@@ -1,17 +1,16 @@
-    import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-    import java.util.LinkedList;
-    import java.util.List;
+import java.util.List;
 
 public class Grid {
     private double L;
     private int M;
     private ArrayList<Particle>[][] grid;
+    private double Rc;
 
-    public Grid (double L, int M) {
+    public Grid (double L, int M, double Rc) {
         this.L = L;
         this.M = M;
+        this.Rc = Rc;
         this.grid = new ArrayList[M][M];
         for (int i = 0; i < M; i++) {
             for (int j = 0; j < M; j++) {
@@ -34,30 +33,52 @@ public class Grid {
         for (int i = 0; i < M; i++) {
             for (int j = 0; j < M; j++) {
                 for (Particle p : grid[i][j]) {
-                    p.addSelfVecins(grid[i][j]);
-                    if(vuelt){
-                        p.addVecins(grid[Math.floorMod(i-1, M)][j]); //up
-                        p.addVecins(grid[Math.floorMod(i-1, M)][Math.floorMod(j+1, M)]); //upright
-                        p.addVecins(grid[i][Math.floorMod(j+1, M)]); //right
-                        p.addVecins(grid[Math.floorMod(i+1, M)][Math.floorMod(j+1, M)]); //downright
-                    }else{
-                        if(i-1 >= 0)
-                            p.addVecins(grid[i-1][j]); //up
-                        if(i-1 >= 0 && j+1 < M)
-                            p.addVecins(grid[i-1][j+1]); //upright
-                        if(j+1 < M)
-                            p.addVecins(grid[i][j+1]); //right
-                        if(i+1 < M && j+1 < M) {
-                            p.addVecins(grid[i+1][j+1]); //downright
+                    p.addSelfVecins(grid[i][j], Rc);
+                    if(vuelt) {
+                        if(i-1 < 0 && j+1 >= M){
+                            p.addVecins(grid[Math.floorMod(i-1, M)][Math.floorMod(j+1, M)], Rc, 1, L); //upright
+                            p.addVecins(grid[Math.floorMod(i-1, M)][j], Rc, 2, L); //up
+                            p.addVecins(grid[i][Math.floorMod(j+1, M)], Rc, 4, L); //right
+                            p.addVecins(grid[Math.floorMod(i + 1, M)][Math.floorMod(j + 1, M)], Rc, 4, L); //downright
+                        } else if(i-1 < 0) {
+                            p.addVecins(grid[Math.floorMod(i-1, M)][Math.floorMod(j+1, M)], Rc, 2, L); //upright
+                            p.addVecins(grid[Math.floorMod(i-1, M)][j], Rc, 2, L); //up
+                            p.addVecins(grid[i][Math.floorMod(j+1, M)], Rc, 0, 0); //right
+                            p.addVecins(grid[Math.floorMod(i + 1, M)][Math.floorMod(j + 1, M)], Rc, 0, 0); //downright
+                        } else if(i+1 >= M && j+1 >= M) {
+                            p.addVecins(grid[Math.floorMod(i-1, M)][Math.floorMod(j+1, M)], Rc, 4, L); //upright
+                            p.addVecins(grid[Math.floorMod(i-1, M)][j], Rc, 0, 0); //up
+                            p.addVecins(grid[i][Math.floorMod(j+1, M)], Rc, 4, L); //right
+                            p.addVecins(grid[Math.floorMod(i + 1, M)][Math.floorMod(j + 1, M)], Rc, 3, L); //downright
+                        } else if(j+1 >= M) {
+                            p.addVecins(grid[Math.floorMod(i - 1, M)][Math.floorMod(j + 1, M)], Rc, 4, L); //upright
+                            p.addVecins(grid[Math.floorMod(i - 1, M)][j], Rc, 0, 0); //up
+                            p.addVecins(grid[i][Math.floorMod(j + 1, M)], Rc, 4, L); //right
+                            p.addVecins(grid[Math.floorMod(i + 1, M)][Math.floorMod(j + 1, M)], Rc, 4, L); //downright
+                        } else if(i+1 >= M) {
+                            p.addVecins(grid[Math.floorMod(i - 1, M)][Math.floorMod(j + 1, M)], Rc, 0, 0); //upright
+                            p.addVecins(grid[Math.floorMod(i - 1, M)][j], Rc, 0, 0); //up
+                            p.addVecins(grid[i][Math.floorMod(j + 1, M)], Rc, 0, 0); //right
+                            p.addVecins(grid[Math.floorMod(i + 1, M)][Math.floorMod(j + 1, M)], Rc, 5, L); //downright
+                        } else {
+                            p.addVecins(grid[Math.floorMod(i-1, M)][Math.floorMod(j+1, M)], Rc, 0, 0); //upright
+                            p.addVecins(grid[Math.floorMod(i-1, M)][j], Rc, 0, 0); //up
+                            p.addVecins(grid[i][Math.floorMod(j+1, M)], Rc, 0, 0); //right
+                            p.addVecins(grid[Math.floorMod(i + 1, M)][Math.floorMod(j + 1, M)], Rc, 0, 0); //downright
                         }
-//                    for(Particle v: p.getVecins()) {
-//                        v.addVecin(p);
-//                    }
+                    } else {
+                        if(i-1 >= 0)
+                            p.addVecins(grid[i-1][j], Rc, 0, 0); //up
+                        if(i-1 >= 0 && j+1 < M)
+                            p.addVecins(grid[i-1][j+1], Rc, 0, 0); //upright
+                        if(j+1 < M)
+                            p.addVecins(grid[i][j+1], Rc, 0, 0); //right
+                        if(i+1 < M && j+1 < M) {
+                            p.addVecins(grid[i+1][j+1], Rc, 0, 0); //downright
+                        }
                     }
-
                 }
             }
         }
     }
-
 }
