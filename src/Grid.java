@@ -21,7 +21,10 @@ public class Grid {
 
     public void populate(List<Particle> particles) {
         for (Particle p : particles) {
+//            System.out.println(p.getPosition().getCellRow(L, M));
+//            System.out.println(p.getPosition().getCellCol(L,M));
             grid[p.getPosition().getCellRow(L, M)][p.getPosition().getCellCol(L,M)].add(p);
+
         }
     }
 

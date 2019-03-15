@@ -33,12 +33,12 @@ public class Particle {
     public void addVecins(ArrayList<Particle> vecins, double Rc, int side, double length) {
         for(Particle p: vecins){
             if(side == 0) {
-                if(getDistance(p) < Rc) {
+                if(getDistance(p) - 2 * radius < Rc) {
                     p.addVecin(this);
                     this.vecins.add(p);
                 }
             } else {
-                if(position.getDistance(p.getPosition(), side, length) < Rc) {
+                if(position.getDistance(p.getPosition(), side, length) - 2 * radius< Rc) {
                     p.addVecin(this);
                     this.vecins.add(p);
                 }
@@ -50,15 +50,9 @@ public class Particle {
 
     public void addSelfVecins(ArrayList<Particle> vecins, double Rc) {
         for(Particle p: vecins){
-            if(p != this && getDistance(p) < Rc) {
+            if(p != this && getDistance(p) - 2 * radius < Rc) {
                 addVecin(p);
             }
-        }
-    }
-
-    public void checkDistnces() {
-        for(Particle p: vecins) {
-            System.out.println(getDistance(p));
         }
     }
 

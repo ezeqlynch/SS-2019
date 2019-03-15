@@ -1,5 +1,12 @@
+import java.io.*;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -10,24 +17,70 @@ public class Main {
          * 0 r x y
          * 1 r x y
          */
-        Grid g = new Grid(100.0, 10, 10);
+        int particles = 100;
+        double size = 100;
+        int cellSize = 8;
+        double rc = 10;
+        boolean edges = false;
         List<Particle> ps = new LinkedList<>();
-//        ps.add(new Particle(0, 98, 98));
-        for (int i = 0; i < 2000; i++) {
-            ps.add(new Particle(0, Math.random() * 100, Math.random() * 100, i));
+        if(args.length == 0) {
+            for (int i = 0; i < particles ; i++) {
+                ps.add(new Particle(4, Math.random() * 100, Math.random() * 100, i));
+            }
+        } else {
+
+            try (Stream<String> stream = Files.lines(Paths.get(args[0]));
+                    BufferedReader br = new BufferedReader(new FileReader(args[0]))) {
+
+                particles = Integer.parseInt(br.readLine());
+                size = Double.parseDouble(br.readLine());
+                cellSize = Integer.parseInt(br.readLine());
+                rc = Double.parseDouble(br.readLine());
+                edges = Boolean.parseBoolean(br.readLine());
+                Stream<String> particlesStream = stream.skip(5);
+                ps = particlesStream.map(e -> {
+                    String[] split = e.split(" ");
+                    return new Particle(Double.parseDouble(split[1]), Double.parseDouble(split[2]), Double.parseDouble(split[3]), Integer.parseInt(split[0]));
+                }).collect(Collectors.toList());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+
+        Grid g = new Grid(size, cellSize, rc);
 
         g.populate(ps);
 
 //        for (ArrayList<Particle>[] a : g.getGrid())
 //            System.out.println(Arrays.deepToString(a));
+        DecimalFormat decimalFormat = new DecimalFormat("0.##");
 
-        g.calculateVecins(true);
+        StringBuilder sbx2 = new StringBuilder();
+        sbx2.append(particles).append('\n').append(size).append('\n').append(cellSize).append('\n').append(rc).append('\n')
+            .append(edges).append('\n');
+        for(Particle p : ps) {
+            sbx2.append(p.getIndex()).append(' ').append(decimalFormat.format(p.getRadius())).append(' ')
+                    .append(decimalFormat.format(p.getPosition().getX())).append(" ")
+                    .append(decimalFormat.format(p.getPosition().getY())).append('\n');
+        }
+        File file = new File("./output.txt");
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(file,false))) {
+            writer.append(sbx2);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        System.out.println(sbx2);
+
+        long t2 = System.nanoTime();
+        g.calculateVecins(edges);
+        long t1 = System.nanoTime();
+        System.out.println(t1 - t2);
+
         StringBuilder sbx = new StringBuilder();
         StringBuilder sby = new StringBuilder();
         sbx.append("x=[");
         sby.append("y=[");
-        DecimalFormat decimalFormat = new DecimalFormat("0.##");
         for(Particle p : ps) {
             sbx.append(decimalFormat.format(p.getPosition().getX())).append(",");
             sby.append(decimalFormat.format(p.getPosition().getY())).append(",");
@@ -36,12 +89,28 @@ public class Main {
 //        System.out.println(ps.get(0).getVecins());
         StringBuilder sbxc = new StringBuilder();
         StringBuilder sbyc = new StringBuilder();
+        StringBuilder vecins = new StringBuilder();
         sbxc.append("xc=[");
         sbyc.append("yc=[");
+        for(Particle p0: ps) {
+            vecins.append(p0.getIndex()).append(' ');
+            for(Particle p: p0.getVecins()) {
+                vecins.append(p.getIndex()).append(' ');
+            }
+            vecins.append('\n');
+        }
+
 
         for(Particle p: ps.get(0).getVecins()) {
             sbxc.append(decimalFormat.format(p.getPosition().getX())).append(",");
             sbyc.append(decimalFormat.format(p.getPosition().getY())).append(",");
+        }
+        File vecinInput = new File("./vecins.txt");
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(vecinInput, false))) {
+            writer.append(Long.toString(t1 - t2)).append('\n');
+            writer.append(vecins);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         sbx.append("];");
         sby.append("];");
