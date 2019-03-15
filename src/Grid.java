@@ -21,8 +21,6 @@ public class Grid {
 
     public void populate(List<Particle> particles) {
         for (Particle p : particles) {
-//            System.out.println(p.getPosition().getCellRow(L, M));
-//            System.out.println(p.getPosition().getCellCol(L,M));
             grid[p.getPosition().getCellRow(L, M)][p.getPosition().getCellCol(L,M)].add(p);
 
         }
@@ -37,7 +35,7 @@ public class Grid {
             for (int j = 0; j < M; j++) {
                 for (Particle p : grid[i][j]) {
                     p.addSelfVecins(grid[i][j], Rc);
-                    if(vuelt) {
+                    if(vuelt && M != 1) {
                         if(i-1 < 0 && j+1 >= M){
                             p.addVecins(grid[Math.floorMod(i-1, M)][Math.floorMod(j+1, M)], Rc, 1, L); //upright
                             p.addVecins(grid[Math.floorMod(i-1, M)][j], Rc, 2, L); //up

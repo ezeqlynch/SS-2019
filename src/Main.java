@@ -1,10 +1,10 @@
 import java.io.*;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,17 +17,24 @@ public class Main {
          * 0 r x y
          * 1 r x y
          */
-        int particles = 100;
-        double size = 100;
-        int cellSize = 8;
-        double rc = 10;
+        int particles = 10000;
+        double size = 20;
+        int cellSize = 1;
+        double rc = 1;
         boolean edges = false;
+        double radius = 0.25;
         List<Particle> ps = new LinkedList<>();
-        if(args.length == 0) {
+        if(args.length > 1) {
+            particles = Integer.parseInt(args[0]);
+            size = Double.parseDouble(args[1]);
+            cellSize = Integer.parseInt(args[2]);
+            rc = Double.parseDouble(args[3]);
+            edges = Boolean.parseBoolean(args[4]);
+            radius = Double.parseDouble(args[5]);
             for (int i = 0; i < particles ; i++) {
-                ps.add(new Particle(4, Math.random() * 100, Math.random() * 100, i));
+                ps.add(new Particle(radius, Math.random() * size, Math.random() * size, i));
             }
-        } else {
+        } else if (args.length == 1){
 
             try (Stream<String> stream = Files.lines(Paths.get(args[0]));
                     BufferedReader br = new BufferedReader(new FileReader(args[0]))) {
@@ -45,6 +52,10 @@ public class Main {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            for (int i = 0; i < particles ; i++) {
+                ps.add(new Particle(radius, Math.random() * size, Math.random() * size, i));
+            }
         }
 
 
@@ -55,7 +66,7 @@ public class Main {
 //        for (ArrayList<Particle>[] a : g.getGrid())
 //            System.out.println(Arrays.deepToString(a));
         DecimalFormat decimalFormat = new DecimalFormat("0.##");
-
+        decimalFormat.setRoundingMode(RoundingMode.DOWN);
         StringBuilder sbx2 = new StringBuilder();
         sbx2.append(particles).append('\n').append(size).append('\n').append(cellSize).append('\n').append(rc).append('\n')
             .append(edges).append('\n');
@@ -126,8 +137,8 @@ public class Main {
         System.out.println(sby.toString());
         System.out.println(sbxc.toString());
         System.out.println(sbyc.toString());
-        System.out.println("circx=10.*sin(t) + " + decimalFormat.format(ps.get(0).getPosition().getX()) + ";");
-        System.out.println("circy=10.*cos(t) + " + decimalFormat.format(ps.get(0).getPosition().getY()) + ";");
+        System.out.println("circx="+decimalFormat.format(rc + 2*radius) + ".*sin(t) + " + decimalFormat.format(ps.get(0).getPosition().getX()) + ";");
+        System.out.println("circy="+decimalFormat.format(rc + 2*radius) + ".*cos(t) + " + decimalFormat.format(ps.get(0).getPosition().getY()) + ";");
         System.out.println("plot(x,y,\"o\",xc,yc,\"ro\", circx, circy, \"k\", x0, y0, \"og\")");
     }
 }
