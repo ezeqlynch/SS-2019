@@ -7,4 +7,4 @@ class Particle:
     self.vecins = []
   
   def __repr__(self):
-    return "%d: x=%.2f, y=%.2f, r=%.2f\n" % (self.id, self.posX, self.posY, self.radius)
+    return "%d: x=%.2f, y=%.2f, r=%.2f" % (self.id, self.posX, self.posY, self.radius)
