@@ -3,6 +3,8 @@ from argparse import RawTextHelpFormatter
 from particle import Particle
 from markerupdater import MarkerUpdater
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
 import numpy as np
 
 
@@ -55,6 +57,20 @@ def redraw(newId):
   ax.set_yticks(minor_ticks, minor=True)
   ax.set_aspect('equal', 'box')
   plt.axis([0, size, 0, size])
+  red_patch = mpatches.Patch(color='red', label='Neighbours')
+  black_patch = mpatches.Patch(color='black', label='Not neighbours')
+  green_patch = mpatches.Patch(color='green', label='Selected Particle')
+  circle_patch = mpatches.Circle((0.5, 0.5), 0.1, facecolor="white",
+                                 edgecolor="green", linewidth=1, label='Neighbour Frontier')
+  first_legend = plt.legend(handles=[red_patch, black_patch, green_patch, circle_patch],
+             bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
+  plt.gca().add_artist(first_legend)
+
+  green_patch2 = mpatches.Patch(color='green', label=particles[idAnalized])
+  plt.legend(handles=[green_patch2],
+             bbox_to_anchor=(1.05, 0), loc=3, borderaxespad=0.)
+
 
   # Or if you want different settings for the grids:
   # ax.grid(which='minor', alpha=0.2)
