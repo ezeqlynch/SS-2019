@@ -18,8 +18,8 @@ public class Main {
          * 0 r x y
          * 1 r x y
          */
-        int height = 250;
-        int width = 250;
+        int height = 1000;
+        int width = 1000;
         Random r = new Random();
 //        int particles = 10000;
 //        double size = 20;
@@ -50,15 +50,15 @@ public class Main {
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                ps.add(new LifeParticle(i, j, i*height + j, false));
+                ps.add(new LifeParticle(i, j, i*height + j, r.nextBoolean()));
             }
         }
 
         for (int i = 50; i < 50 + 5; i++) {
             for (int j = 50; j < 50 + 7; j++) {
                 ps.get(i*height + j).setAlive(b[(i-50)*7 + (j-50)]);
-                System.out.println((i-50)*5 + (j-50));
-                System.out.println(ps.get(i*height + j).getX() + " " +ps.get(i*height + j).getY());
+//                System.out.println((i-50)*5 + (j-50));
+//                System.out.println(ps.get(i*height + j).getX() + " " +ps.get(i*height + j).getY());
             }
         }
 
@@ -122,7 +122,7 @@ public class Main {
         System.out.println(t1 - t2);
 
         printOvito(list);
-        print(list);
+//        print(list);
 
 
 //        StringBuilder sbx = new StringBuilder();

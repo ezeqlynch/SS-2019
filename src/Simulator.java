@@ -22,7 +22,7 @@ public class Simulator {
             grid.calculateVecins();
             for(LifeParticle p : grid.getParticles()) {
 //                System.out.println(p.getX() + " " + p.getY() + " " + p.isAlive());
-                int aliveVecins = (int) p.getVecins().stream().filter(LifeParticle::isAlive).count();
+                int aliveVecins = p.getVecins();
                 if(p.isAlive()) {
                     if (aliveVecins == 2 || aliveVecins == 3) {
                         ps.add(p.clone(true));
