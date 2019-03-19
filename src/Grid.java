@@ -35,7 +35,7 @@ public class Grid {
             for (int j = 0; j < M; j++) {
                 for (Particle p : grid[i][j]) {
                     p.addSelfVecins(grid[i][j], Rc);
-                    if(vuelt && M != 1) {
+                    if(vuelt) {
                         if(i-1 < 0 && j+1 >= M){
                             p.addVecins(grid[Math.floorMod(i-1, M)][Math.floorMod(j+1, M)], Rc, 1, L); //upright
                             p.addVecins(grid[Math.floorMod(i-1, M)][j], Rc, 2, L); //up
