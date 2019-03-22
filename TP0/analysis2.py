@@ -35,21 +35,26 @@ def argumentParser():
 
 
 def redraw(newId):
-  plt.cla()
+  # plt.cla()
+  ax.clear()
   idAnalized = newId
   c = list(map(lambda particle: 'black', particles))
   c[idAnalized] = 'g'
   for vecin in particles[idAnalized].vecins:
     c[vecin] = 'r'
   
+  for p in particles:
+    circle = plt.Circle((p.posX, p.posY),
+                        p.radius, color=c[p.id], fill=True)
+    ax.add_artist(circle)
   coll = ax.scatter(x, y, s, c,  marker='o', picker=True)
   ax.set_title("Particle neighbours")
   plt.xlabel('x coordinates')
   plt.ylabel('y coordinates')
   # ax.grid(True)
   # Major ticks every 20, minor ticks every 5
-  major_ticks = np.arange(0, size + 1, 10)
-  minor_ticks = np.arange(0, size + 1, 5)
+  major_ticks = np.arange(0, size + 1, cellSize)
+  minor_ticks = np.arange(0, size + 1, cellSize/2)
 
   ax.set_xticks(major_ticks)
   ax.set_xticks(minor_ticks, minor=True)
@@ -61,7 +66,7 @@ def redraw(newId):
   black_patch = mpatches.Patch(color='black', label='Not neighbours')
   green_patch = mpatches.Patch(color='green', label='Selected Particle')
   circle_patch = mpatches.Circle((0.5, 0.5), 0.1, facecolor="white",
-                                 edgecolor="green", linewidth=1, label='Neighbour Frontier')
+                                 edgecolor="green", linewidth=1, label='Rc + Selected Radius')
   first_legend = plt.legend(handles=[red_patch, black_patch, green_patch, circle_patch],
              bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
