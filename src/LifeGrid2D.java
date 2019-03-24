@@ -1,12 +1,21 @@
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-public class LifeGrid2D {
+public class LifeGrid2D implements LifeGrid{
     private int height;
     private int width;
     private LifeParticle[][] grid;
     private List<LifeParticle> particles;
+    private int[] dirs = {  -1,1,
+                            -1,0,
+                            -1,-1,
+                            0,-1,
+                            0,1,
+                            1,1,
+                            1,0,
+                            1,-1};
 
     public LifeGrid2D(int H, int W) {
         this.height = H;
@@ -16,31 +25,47 @@ public class LifeGrid2D {
     }
 
     public void populate(List<LifeParticle> ps) {
+        List<LifeParticle> dedPart = new LinkedList<>();
+        this.grid = new LifeParticle[height][width];
         for(LifeParticle p : ps) {
             grid[p.getX()][p.getY()] = p;
         }
+        for(LifeParticle p : ps) {
+            if(p.isAlive()) {
+
+                int x = p.getX();
+                int y = p.getY();
+                for (int i = 0; i < dirs.length; i += 2) {
+                    if (x + dirs[i] >= 0 && x + dirs[i] < height && y + dirs[i + 1] >= 0 && y + dirs[i + 1] < width) {
+                        if(grid[x+dirs[i]][y + dirs[i + 1]] == null) {
+                            LifeParticle deadP = new LifeParticle(x + dirs[i], y + dirs[i + 1], (x + dirs[i]) * height + (y + dirs[i + 1]), false);
+                            grid[x + dirs[i]][y + dirs[i + 1]] = deadP;
+                            dedPart.add(deadP);
+                        }
+                    }
+
+                }
+            }
+        }
+        ps.addAll(dedPart);
         this.particles = ps;
     }
 
     public void calculateVecins() {
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if(i-1 >= 0) {
-                    grid[i][j].addVecinAndVicenVersa(grid[i-1][j]);
-                }
-                if(i-1 >= 0 && j+1 < width) {
-                    grid[i][j].addVecinAndVicenVersa(grid[i-1][j+1]);
-                }
-                if(j+1 < width) {
-                    grid[i][j].addVecinAndVicenVersa(grid[i][j+1]);
-                }
-                if(i+1 < height && j+1 < width) {
-                    grid[i][j].addVecinAndVicenVersa(grid[i+1][j+1]);
-                }
-//                grid[i][j].addVecin(grid[i+1][j]);
-//                grid[i][j].addVecin(grid[i+1][j-1]);
-//                grid[i][j].addVecin(grid[i][j-1]);
-//                grid[i][j].addVecin(grid[i-1][j-1]);
+        for(LifeParticle p : particles) {
+            int x = p.getX();
+            int y = p.getY();
+            if(x-1 >= 0) {
+                grid[x][y].addVecinAndVicenVersa(grid[x-1][y]);
+            }
+            if(x-1 >= 0 && y+1 < width) {
+                grid[x][y].addVecinAndVicenVersa(grid[x-1][y+1]);
+            }
+            if(y+1 < width) {
+                grid[x][y].addVecinAndVicenVersa(grid[x][y+1]);
+            }
+            if(x+1 < height && y+1 < width) {
+                grid[x][y].addVecinAndVicenVersa(grid[x+1][y+1]);
             }
         }
     }
