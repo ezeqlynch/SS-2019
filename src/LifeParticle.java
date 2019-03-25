@@ -10,6 +10,7 @@ public class LifeParticle {
     private boolean alive;
     //    private List<LifeParticle> vecins;
     private int vecins;
+    private double centerDist;
 
     public LifeParticle(int x, int y, int index, boolean alive) {
         this.x = x;
@@ -30,7 +31,9 @@ public class LifeParticle {
     }
 
     public LifeParticle clone(boolean alive) {
-        return new LifeParticle(x, y, z, index, alive);
+        LifeParticle p = new LifeParticle(x, y, z, index, alive);
+        p.setCenterDist(centerDist);
+        return p;
     }
 
     public void addVecin() {
@@ -77,5 +80,13 @@ public class LifeParticle {
 
     public int getZ() {
         return z;
+    }
+
+    public double getCenterDist() {
+        return centerDist;
+    }
+
+    public void setCenterDist(double centerDist) {
+        this.centerDist = centerDist;
     }
 }

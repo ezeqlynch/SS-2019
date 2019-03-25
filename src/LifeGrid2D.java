@@ -6,6 +6,7 @@ import java.util.List;
 public class LifeGrid2D implements LifeGrid{
     private int height;
     private int width;
+    private int depth;
     private LifeParticle[][] grid;
     private List<LifeParticle> particles;
     private int[] dirs = {  -1,1,
@@ -33,6 +34,7 @@ public class LifeGrid2D implements LifeGrid{
         for(LifeParticle p : ps) {
             if(p.isAlive()) {
 
+                p.setCenterDist(Math.sqrt((Math.pow((double) p.getX() - (double) height/2.0, 2) + Math.pow((double) p.getY() - (double) width/2.0, 2) + Math.pow((double) p.getZ() - (double) depth/2.0, 2))));
                 int x = p.getX();
                 int y = p.getY();
                 for (int i = 0; i < dirs.length; i += 2) {
@@ -80,6 +82,10 @@ public class LifeGrid2D implements LifeGrid{
 
     public int getWidth() {
         return width;
+    }
+
+    public int getDepth() {
+        return 0;
     }
 
     public void setWidth(int width) {
