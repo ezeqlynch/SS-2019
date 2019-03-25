@@ -1,0 +1,82 @@
+import argparse
+from argparse import RawTextHelpFormatter
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+
+def argumentParser():
+  parser = argparse.ArgumentParser(
+      description='This program shows data from .\n', formatter_class=RawTextHelpFormatter)
+
+  parser.add_argument(
+      '--staticFile',
+      help="Path to the static data file.",
+      default='data/2333'
+  )
+
+  return parser
+
+
+if __name__ == "__main__":
+
+        # get parser
+        parsedArgs = argumentParser().parse_args()
+        allParticlesPerFrame = []
+        allMaxDistances = []
+        allAverages = []
+        allSD = []
+
+
+        
+        for file in os.listdir(parsedArgs.staticFile):
+            if file.endswith(".stats"):
+                # staticFile = open("data/2333/2333-stats-%d.stats" % (i), "r")
+                staticFile = open(os.path.join(parsedArgs.staticFile, file), "r")
+                particlesPerFrame = []
+                maxDistances = []
+                averages = []
+                sd = []
+
+                time = 0
+
+                for line in staticFile:
+                        stepData = [s for s in line.split()]
+                        # print(stepData)
+                        if (len(stepData) == 1):
+                                time = int(stepData[0])
+                        else:
+                                particlesPerFrame.append(int(stepData[0]))
+                                maxDistances.append(float(stepData[1]))
+                                averages.append(float(stepData[2]))
+                                sd.append(float(stepData[3]))
+                allParticlesPerFrame.append(particlesPerFrame)
+                allMaxDistances.append(maxDistances)
+                allAverages.append(averages)
+                allSD.append(sd)
+                plt.plot(range(len(particlesPerFrame)), particlesPerFrame, alpha=0.5)
+        avgAvgPPF = []
+        avgSD = []
+        for i in range(0, len(allParticlesPerFrame[0])):
+                a = []
+                for j in range(0, 25):
+                        a.append(allParticlesPerFrame[j][i])
+                avgAvgPPF.append(np.mean(a))
+                avgSD.append(np.std(a))
+
+        # print(averages)
+
+        # Plot histogram data
+        plt.title('Number of particles over time') 
+        plt.ylabel('Number of particles') 
+        plt.xlabel('Frame')  
+        plt.grid()
+        major_ticks = np.arange(0, 1000 + 1, 500)
+        minor_ticks = np.arange(0, 1000 + 1, 50)
+
+        plt.errorbar(range(len(avgAvgPPF)),
+                     avgAvgPPF, yerr=sd, fmt='none', ecolor='pink')
+        plt.plot(range(len(avgAvgPPF)),avgAvgPPF, color="black")
+        # plt.tight_layout()
+        plt.show()

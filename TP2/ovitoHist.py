@@ -1,7 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import PyQt5.QtGui
-from ovito.modifiers import *
+import ovito
 
 # Activate 'agg' backend for off-screen plotting.
 matplotlib.use('Agg')
@@ -10,13 +10,14 @@ def render(painter, **args):
 
 	# Find the existing HistogramModifier in the pipeline 
 	# and get its histogram data.
-	for mod in ovito.dataset.selected_node.modifiers:
-		if isinstance(mod, HistogramModifier):
-			x = mod.histogram[:,0]
-			y = mod.histogram[:,1]
-			break
-	if not 'x' in locals():
-		raise RuntimeError('Histogram modifier not found.')
+	node = ovito.dataset.selected_node
+	data = node.compute()
+	num_particles = (data.number_of_particles if node else 0)
+	text2 = "{} particles".format(num_particles)
+	painter.drawText(10, painter.window().height() - 10, text2)
+
+
+
 	
 	# Get size of rendered viewport image in pixels.
 	viewport_width = painter.window().width()

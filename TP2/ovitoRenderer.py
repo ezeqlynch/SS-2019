@@ -13,8 +13,8 @@ def render(painter, **args):
 	num_particles = (node.compute().number_of_particles if node else 0)
 	text2 = "{} particles".format(num_particles)
 	painter.drawText(10, painter.window().height() - 10, text2)
-	ovito.
 
+	
 	# Print to the log window:
 	print(text1)
 	print(text2)
