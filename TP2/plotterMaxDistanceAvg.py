@@ -7,6 +7,8 @@ import math
 import os
 import matplotlib.patches as mpatches
 import matplotlib.ticker as ticker
+from textwrap import wrap
+
 
 
 
@@ -57,7 +59,7 @@ if __name__ == "__main__":
 
                 for line in staticFile:
                         stepData = [s for s in line.split()]
-                        if (len(particlesPerFrame) == 300):
+                        if (len(particlesPerFrame) > 300):
                                 break
                         # print(stepData)
                         if (len(stepData) == 1):
@@ -76,14 +78,17 @@ if __name__ == "__main__":
         for i in range(0, len(allMaxDistances[0])):
                 a = []
                 for j in range(0, 25):
-                        a.append(allMaxDistances[j][i])
+                        if(i < len(allMaxDistances[j])):
+                                a.append(allMaxDistances[j][i])
+                        else:
+                                a.append(0)
                 avgMaxDistances.append(np.mean(a))
                 avgSD.append(np.std(a))
 
         # print(avgSD)
 
         # Plot histogram data
-        plt.ylabel('Distancia al centro') 
+        plt.ylabel('Distancia al centro (medida en celdas)') 
         plt.xlabel('Iteración')
 
         plt.grid(b=True, which='major', linestyle='-')
@@ -94,14 +99,12 @@ if __name__ == "__main__":
         title = mpatches.Rectangle(
             (0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0, label=parsedArgs.name)
         if(parsedArgs.showError):
-                plt.title(
-                    'Promedio general de distancias máximas de las celdas vivas al centro en varias simulaciones.')
+                plt.title("\n".join(wrap('Promedio de distancias de la celda viva más lejana al centro en 25 simulaciones.', 60)))
                 pink_patch = mpatches.Patch(color='pink', label='Error')
                 first_legend = plt.legend(
                     handles=[title, black_patch, pink_patch], loc=0)
         else:
-                plt.title(
-                    'Promedios de distancias máximas de las celdas vivas al centro en varias simulaciones.')
+                plt.title("\n".join(wrap('Distancia de la celda viva más lejana al centro en 25 simulaciones.', 60)))
                 first_legend = plt.legend(handles=[title, black_patch], loc=0)
         plt.gca().add_artist(first_legend)
 
@@ -109,6 +112,10 @@ if __name__ == "__main__":
                 plt.errorbar(range(len(avgMaxDistances)), avgMaxDistances, yerr=avgSD, fmt='none', ecolor='pink')
         
         plt.plot(range(len(avgMaxDistances)),avgMaxDistances, color="black")
-        # plt.tight_layout()
+        plt.tight_layout()
+        if(parsedArgs.showError):
+                plt.savefig(parsedArgs.staticFile + 'MaxDistanceAvg'+ parsedArgs.name +'_error.png', bbox_inches='tight')
+        else:
+                plt.savefig(parsedArgs.staticFile + 'MaxDistanceAvg'+ parsedArgs.name +'.png', bbox_inches='tight')
         plt.show()
 

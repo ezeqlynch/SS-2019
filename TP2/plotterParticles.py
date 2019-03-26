@@ -44,6 +44,8 @@ if __name__ == "__main__":
 
         for line in staticFile:
           stepData = [s for s in line.split()]
+          if (len(particlesPerFrame) > 300):
+            break
           if (len(stepData) == 1):
             time = int(stepData[0])
           else:
@@ -51,8 +53,8 @@ if __name__ == "__main__":
 
 
         # Plot histogram data
-        plt.title('Cantidad de particulas a lo largo del tiempo.') 
-        plt.ylabel('Cantidad de particulas') 
+        plt.title('Cantidad de celdas vivas a lo largo del tiempo.') 
+        plt.ylabel('Cantidad de celdas vivas') 
         plt.xlabel('Iteración') 
         plt.grid(b=True, which='major', linestyle='-')
         plt.grid(b=True, which='minor', color="gray", linestyle='--')

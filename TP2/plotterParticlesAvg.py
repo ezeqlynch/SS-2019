@@ -6,6 +6,7 @@ import numpy as np
 import os
 import matplotlib.patches as mpatches
 import matplotlib.ticker as ticker
+from textwrap import wrap
 
 
 
@@ -59,7 +60,7 @@ if __name__ == "__main__":
 
                 for line in staticFile:
                         stepData = [s for s in line.split()]
-                        if (len(particlesPerFrame) == 300):
+                        if (len(particlesPerFrame) > 100):
                                 break
                         # print(stepData)
                         if (len(stepData) == 1):
@@ -80,28 +81,30 @@ if __name__ == "__main__":
         for i in range(0, len(allParticlesPerFrame[0])):
                 a = []
                 for j in range(0, 25):
-                        a.append(allParticlesPerFrame[j][i])
+                        if(i < len(allParticlesPerFrame[j])):
+                                a.append(allParticlesPerFrame[j][i])
+                        else:
+                                a.append(0)
                 avgAvgPPF.append(np.mean(a))
                 avgSD.append(np.std(a))
 
         # print(averages)
-
         # Plot histogram data
-        plt.ylabel('Cantidad de particulas') 
+        plt.ylabel('Cantidad de celdas vivas') 
         plt.xlabel('Iteración')  
         plt.grid(b=True, which='major', linestyle='-')
         plt.grid(b=True, which='minor', color="gray", linestyle='--')
-        plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(250))
+        plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(1000))
 
 
         black_patch = mpatches.Patch(color='black', label='Promedio')
         title = mpatches.Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0, label=parsedArgs.name)
         if(parsedArgs.showError):
-                plt.title('Promedio de cantidad de particulas a lo largo del tiempo en varias simulaciones.')
+                plt.title("\n".join(wrap('Promedio de cantidad de celdas vivas a lo largo del tiempo en 25 simulaciones.',60)))
                 pink_patch = mpatches.Patch(color='pink', label='Error')
                 first_legend = plt.legend(handles=[title, black_patch, pink_patch], loc=0)
         else:
-                plt.title('Cantidad de particulas a lo largo del tiempo en varias simulaciones y su promedio.')
+                plt.title("\n".join(wrap('Cantidad de celdas vivas a lo largo del tiempo en 25 simulaciones y su promedio.',60)))
                 first_legend = plt.legend(handles=[title, black_patch], loc=0)
 
         plt.gca().add_artist(first_legend)
@@ -114,5 +117,9 @@ if __name__ == "__main__":
         if(parsedArgs.showError):
                 plt.errorbar(range(len(avgAvgPPF)), avgAvgPPF, yerr=avgSD, fmt='none', ecolor='pink')
         plt.plot(range(len(avgAvgPPF)),avgAvgPPF, color="black")
-        # plt.tight_layout()
+        plt.tight_layout()
+        if(parsedArgs.showError):
+                plt.savefig(parsedArgs.staticFile + 'ParticlesAvg'+ parsedArgs.name +'_error.png', bbox_inches='tight')
+        else:
+                plt.savefig(parsedArgs.staticFile + 'ParticlesAvg'+ parsedArgs.name +'.png', bbox_inches='tight')
         plt.show()

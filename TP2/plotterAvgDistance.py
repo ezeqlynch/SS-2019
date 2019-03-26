@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 # import PyQt5.QtGui
 import matplotlib.patches as mpatches
 import matplotlib.ticker as ticker
+from textwrap import wrap
 
 
 
@@ -48,8 +49,8 @@ if __name__ == "__main__":
         for line in staticFile:
                 stepData = [s for s in line.split()]
                 # print(stepData)
-                if (len(particlesPerFrame) == 300):
-                                break
+                if (len(particlesPerFrame) > 300):
+                        break
                 if (len(stepData) == 1):
                         time = int(stepData[0])
                 else:
@@ -62,7 +63,7 @@ if __name__ == "__main__":
 
         # Plot histogram data
         plt.title('Distancia promedio y maxima de las celdas vivas al centro.') 
-        plt.ylabel('Distancia al centro') 
+        plt.ylabel('Distancia al centro (medida en celdas)') 
         plt.xlabel('Iteración')  
         plt.errorbar(range(len(averages)),
                      averages, yerr=sd, fmt='none', ecolor='pink')
@@ -81,5 +82,5 @@ if __name__ == "__main__":
             (0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0, label=parsedArgs.name)
         first_legend = plt.legend(
                 handles=[title, black_patch, pink_patch, blue_patch], loc=0)
-        # plt.tight_layout()
+        plt.tight_layout()
         plt.show()

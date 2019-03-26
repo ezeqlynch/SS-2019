@@ -6,7 +6,7 @@ import numpy as np
 import os
 import matplotlib.patches as mpatches
 import matplotlib.ticker as ticker
-
+from textwrap import wrap
 
 
 def argumentParser():
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
                 for line in staticFile:
                         stepData = [s for s in line.split()]
-                        if (len(particlesPerFrame) == 300):
+                        if (len(particlesPerFrame) > 300):
                                 break
                         # print(stepData)
                         if (len(stepData) == 1):
@@ -78,35 +78,44 @@ if __name__ == "__main__":
         for i in range(0, len(allAverages[0])):
                 a = []
                 for j in range(0, 25):
-                        a.append(allAverages[j][i])
+                        if(i < len(allAverages[j])):
+                                a.append(allAverages[j][i])
+                        else:
+                                a.append(0)
                 avgAvgDistances.append(np.mean(a))
                 avgSD.append(np.std(a))
 
         # print(averages)
+        print(avgSD)
 
         # Plot histogram data
-        plt.ylabel('Distancia al centro') 
+        plt.ylabel('Distancia al centro (medida en celdas)') 
         plt.xlabel('Iteración')  
 
         plt.grid(b=True, which='major', linestyle='-')
         plt.grid(b=True, which='minor', color="gray", linestyle='--')
-        plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(5))
+        plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
         black_patch = mpatches.Patch(color='black', label='Promedio')
         title = mpatches.Rectangle(
             (0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0, label=parsedArgs.name)
         if(parsedArgs.showError):
-                plt.title('Promedio general de distancias de las celdas vivas al centro en varias simulaciones.')
+                plt.title("\n".join(wrap('Promedio general de distancias de las celdas vivas al centro en 25 simulaciones.',60)))
                 pink_patch = mpatches.Patch(color='pink', label='Error')
                 first_legend = plt.legend(
-                    handles=[title, black_patch, pink_patch], loc=0)
+                    handles=[title, black_patch, pink_patch], loc=2)
         else:
-                plt.title('Promedios de distancias de las celdas vivas al centro en varias simulaciones.')
+                plt.title("\n".join(wrap('Promedios de distancias de las celdas vivas al centro en 25 simulaciones.',60)))
                 first_legend = plt.legend(handles=[title, black_patch], loc=0)
 
         plt.gca().add_artist(first_legend)
         if(parsedArgs.showError):
-                plt.errorbar(range(len(averages)), averages, yerr=sd, fmt='none', ecolor='pink')
-        plt.plot(range(len(avgAvgDistances)),avgAvgDistances, color="black")
-        # plt.tight_layout()
+                plt.errorbar(range(len(averages)), averages, yerr=sd, fmt='black', ecolor='pink')
+        else:
+                plt.errorbar(range(len(averages)), averages, yerr=0, fmt='black', ecolor='pink')
+        plt.tight_layout()
+        if(parsedArgs.showError):
+                plt.savefig(parsedArgs.staticFile + 'AvgDistanceAvg'+ parsedArgs.name +'_error.png', bbox_inches='tight')
+        else:
+                plt.savefig(parsedArgs.staticFile + 'AvgDistanceAvg'+ parsedArgs.name +'.png', bbox_inches='tight')
         plt.show()
