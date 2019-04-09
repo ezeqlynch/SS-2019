@@ -9,14 +9,14 @@ public class Calculator {
     }
 
     public static double timeToCollision(BrownParticle a, BrownParticle b) {
-        double[] deltav = {a.getVx() - b.getVx(), a.getVy() - b.getVy()};
         double[] deltar = {a.getX() - b.getX(), a.getY() - b.getY()};
-        double deltarsq = Math.pow(deltar[0], 2) + Math.pow(deltar[1], 2);
-        double deltavsq = Math.pow(deltav[0], 2) + Math.pow(deltav[1], 2);
+        double[] deltav = {a.getVx() - b.getVx(), a.getVy() - b.getVy()};
         double deltavr = deltav[0] * deltar[0] + deltav[1] * deltar[1];
         if(deltavr >= 0) {
             return 1000; //asumimos q en 1000 segundos va a haber alguna colision
         }
+        double deltarsq = Math.pow(deltar[0], 2) + Math.pow(deltar[1], 2);
+        double deltavsq = Math.pow(deltav[0], 2) + Math.pow(deltav[1], 2);
         double sigma = a.getRadius() + b.getRadius();
         double d = deltavr * deltavr - deltavsq * (deltarsq - sigma * sigma);
         if(d < 0) {

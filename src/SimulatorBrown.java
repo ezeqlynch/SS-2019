@@ -43,7 +43,7 @@ public class SimulatorBrown {
                 tcoll = Calculator.timeToCollision(p, p2);
                 p.setNextColl(p2.getIndex(), tcoll);
                 p2.setNextColl(p.getIndex(), tcoll);
-                if(tcoll > 1e-6 && tcoll < nextColl) {
+                if(tcoll < nextColl) {
                     nextColl = tcoll;
                     collIndex1 = p.getIndex();
                     collIndex2 = p2.getIndex();
@@ -99,9 +99,9 @@ public class SimulatorBrown {
         if(collIndex2 < 0){
             switch (collIndex2){
                 case -1:
-                case -2: p1.setVx(p1.getVx() * -1);
+                case -2: p1.setVx(p1.getVx() * -1);break;
                 case -3: //up
-                case -4: p1.setVy(p1.getVy() * -1);//down
+                case -4: p1.setVy(p1.getVy() * -1);break;//down
             }
             return;
         }
