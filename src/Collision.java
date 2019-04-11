@@ -1,21 +1,29 @@
 public class Collision {
     private int index1;
     private int index2;
-    private double timeTo;
+    private double timeOf;
 
-    public Collision(int i1, int i2, double timeTo) {
+    public Collision(int i1, int i2, double timeOf) {
         index1 = i1;
         index2 = i2;
-        this.timeTo = timeTo;
+        this.timeOf = timeOf;
     }
 
-    public double getTimeTo() {
-        return timeTo;
+    public double getTimeOf() {
+        return timeOf;
     }
 
-    public void setTimeTo(double timeTo) {
-        if(timeTo < this.timeTo){
-            this.timeTo = timeTo;
+    public void setTimeOf(double timeOf) {
+        if(timeOf < this.timeOf){
+            this.timeOf = timeOf;
         }
+    }
+
+    public int getIndex1() {
+        return index1;
+    }
+
+    public int getIndex2() {
+        return index2;
     }
 }

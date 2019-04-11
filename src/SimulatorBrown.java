@@ -1,3 +1,9 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 
 public class SimulatorBrown {
@@ -6,11 +12,11 @@ public class SimulatorBrown {
     private int collIndex1;
     private int collIndex2;
     private ArrayList<ArrayList<BrownParticle>> steps;
+    private ArrayList<Collision> colls;
 
     public SimulatorBrown(int n) {
         this.n = n;
-        this.ps = new ArrayList<>();
-        steps = new ArrayList<>();
+
     }
 
     public void generateParticles() {
@@ -52,7 +58,7 @@ public class SimulatorBrown {
             if(p.getVx() > 0) { //left wall
                 tcoll = (0.5 - p.getRadius() - p.getX()) / p.getVx();
                 p.setNextColl(-2, tcoll);
-                if(tcoll > 1e-6 && tcoll < nextColl) {
+                if(tcoll > 1e-9 && tcoll < nextColl) {
                     nextColl = tcoll;
                     collIndex1 = p.getIndex();
                     collIndex2 = -2;
@@ -60,7 +66,7 @@ public class SimulatorBrown {
             } else if( p.getVx() < 0) { //right wall
                 tcoll = (p.getRadius() - p.getX()) / p.getVx();
                 p.setNextColl(-1, tcoll);
-                if(tcoll > 1e-6 && tcoll < nextColl) {
+                if(tcoll > 1e-9 && tcoll < nextColl) {
                     nextColl = tcoll;
                     collIndex1 = p.getIndex();
                     collIndex2 = -1;
@@ -69,7 +75,7 @@ public class SimulatorBrown {
             if(p.getVy() > 0) { //down wall
                 tcoll = (0.5 - p.getRadius() - p.getY()) / p.getVy();
                 p.setNextColl(-4, tcoll);
-                if(tcoll > 1e-6 && tcoll < nextColl) {
+                if(tcoll > 1e-9 && tcoll < nextColl) {
                     nextColl = tcoll;
                     collIndex1 = p.getIndex();
                     collIndex2 = -4;
@@ -77,7 +83,7 @@ public class SimulatorBrown {
             } else if( p.getVy() < 0) { //up wall
                 tcoll = (p.getRadius() - p.getY()) / p.getVy();
                 p.setNextColl(-3, tcoll);
-                if(tcoll > 1e-6 && tcoll < nextColl) {
+                if(tcoll > 1e-9 && tcoll < nextColl) {
                     nextColl = tcoll;
                     collIndex1 = p.getIndex();
                     collIndex2 = -3;
@@ -115,21 +121,63 @@ public class SimulatorBrown {
         p2.setVy(p2.getVy() - Jy/p2.getMass());
     }
 
-    public void simulate(double totalTime) {
+    public void simulate(double totalTime, int index) {
+        long timen = System.nanoTime();
+        this.ps = new ArrayList<>();
+        this.steps = new ArrayList<>();
+        this.colls = new ArrayList<>();
         this.generateParticles();
-        int step = 0;
+        int step = 1;
+        steps.add(cloneList());
+        double totalTimeFixed = totalTime;
         while(totalTime > 0){
             double time = this.findNextCollision();
             this.evolveParticles(time);
             if(collIndex1 == 0 && collIndex2 < 0){
+                calcPositions(index, totalTimeFixed - totalTime);
+                Main.printOvito(steps, colls, index, n, totalTimeFixed - totalTime);
                 return;
             }
             this.makeCollision();
             steps.add(step, cloneList());
-            ps = steps.get(step);
             totalTime -= time;
+            colls.add(new Collision(collIndex1, collIndex2, totalTimeFixed - totalTime));
             step++;
-            System.out.println(totalTime);
+            if(step % 5000 == 0){
+                System.out.println(totalTime);
+            }
+        }
+        System.out.println(totalTime);
+        System.out.println(System.nanoTime() - timen);
+        Main.printOvito(steps, colls, index, n, totalTimeFixed - totalTime);
+        calcPositions(index, totalTimeFixed - totalTime);
+    }
+
+    public void calcPositions(int index, double totTime) {
+        NumberFormat ftime = new DecimalFormat("#0.000");
+        int frames = (int)totTime * 60;
+        try(FileWriter fw = new FileWriter(n + "-"+index+"-test-" +ftime.format((double)steps.size()/frames) + ".xyz", false);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw)) {
+            NumberFormat f = new DecimalFormat("#0.000000");
+            int counter = -1;
+            for(ArrayList<BrownParticle> a : steps) {
+                    out.println(a.size());
+                    out.println();
+                    for (BrownParticle p : a) {
+                        if(counter >= 0 && (colls.get(counter).getIndex1() == p.getIndex() || colls.get(counter).getIndex2() == p.getIndex())) {
+                            out.println(p.getIndex() + " " + f.format(p.getX()) + " " + f.format(p.getY()) + " " + p.getRadius() + " 1");
+                        } else {
+                            out.println(p.getIndex() + " " + f.format(p.getX()) + " " + f.format(p.getY()) + " " + p.getRadius() + " 0.3");
+                        }
+
+                    }
+                    counter++;
+
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
@@ -140,8 +188,12 @@ public class SimulatorBrown {
             l.add(p.clone());
         }
         return l;
-
     }
+
+    public ArrayList<Collision> getColls() {
+        return colls;
+    }
+
     public List<BrownParticle> getParticles() {
         return ps;
     }

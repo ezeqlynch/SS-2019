@@ -10,9 +10,13 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        SimulatorBrown sb = new SimulatorBrown(10);
-        sb.simulate(600);
-        printOvito(sb.getSteps());
+        SimulatorBrown sb = new SimulatorBrown(100);
+        for (int i = 0; i < 10; i++) {
+            System.out.println(i);
+            sb.simulate(600, i);
+
+        }
+//        printOvito(sb.getSteps(), sb.getColls());
     }
 
     public static void print(List<BrownParticle> list) {
@@ -56,19 +60,35 @@ public class Main {
 //        }
     }
 
-    public static void printOvito (ArrayList<ArrayList<BrownParticle>> steps) {
-        NumberFormat formatter = new DecimalFormat("#0.000");
+    public static void printOvito (ArrayList<ArrayList<BrownParticle>> steps, ArrayList<Collision> colls, int index, int n, double totTime) {
+        NumberFormat f = new DecimalFormat("#0.000000");
         StringBuilder sbp = new StringBuilder();
-        for (ArrayList<BrownParticle> list : steps){
-            sbp.append(list.size()).append("\n\n");
+        sbp.append(steps.get(0).size()).append("\n\n");
 
-            for(BrownParticle p : list) {
-                sbp.append(p.getIndex()).append(' ').append(formatter.format(p.getX())).append(' ').append(formatter.format(p.getY())).append(' ').append(p.getRadius())
-                        .append(' ').append(formatter.format(p.getVx())).append(' ').append(formatter.format(p.getVy())).append('\n');
-            }
-//        System.out.println(sbp);
+        for(BrownParticle p : steps.get(0)) {
+            sbp.append(p.getIndex()).append(' ').append(f.format(p.getX())).append(' ').append(f.format(p.getY())).append(' ').append(p.getRadius())
+                    .append(' ').append(f.format(p.getVx())).append(' ').append(f.format(p.getVy())).append('\n');
         }
-        File file = new File("./test.xyz");
+        sbp.append("\n").append(steps.size()).append('\n');
+        int counter = 1;
+        for (Collision coll : colls){
+            sbp.append(coll.getTimeOf()).append('\n');
+            BrownParticle bp = steps.get(counter).get(0);
+            sbp.append(bp.getIndex()).append(" ").append(f.format(bp.getX())).append(' ').append(f.format(bp.getY())).append('\n');
+            BrownParticle coll1 = steps.get(counter).get(coll.getIndex1());
+            sbp.append(coll1.getIndex()).append(' ').append(f.format(coll1.getVx())).append(' ').append(f.format(coll1.getVy())).append('\n');
+            if(coll.getIndex2() >= 0) {
+                BrownParticle coll2 = steps.get(counter).get(coll.getIndex2());
+                sbp.append(coll2.getIndex()).append(' ').append(f.format(coll2.getVx())).append(' ').append(f.format(coll2.getVy())).append('\n');
+            } else {
+                sbp.append(coll.getIndex2()).append('\n');
+            }
+            sbp.append('\n');
+            counter++;
+        }
+        NumberFormat ftime = new DecimalFormat("#0.000");
+        int frames = (int)totTime * 60;
+        File file = new File(n + "-"+index+"-test-" +ftime.format((double)steps.size()/frames) + ".stat");
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(file,false))) {
             writer.append(sbp);
         } catch (IOException e) {
