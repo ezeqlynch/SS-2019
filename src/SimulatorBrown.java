@@ -11,12 +11,13 @@ public class SimulatorBrown {
     private ArrayList<BrownParticle> ps;
     private int collIndex1;
     private int collIndex2;
+    private double maxSpeed;
     private ArrayList<ArrayList<BrownParticle>> steps;
     private ArrayList<Collision> colls;
 
-    public SimulatorBrown(int n) {
+    public SimulatorBrown(int n, double maxSpeed) {
         this.n = n;
-
+        this.maxSpeed = maxSpeed;
     }
 
     public void generateParticles() {
@@ -26,8 +27,8 @@ public class SimulatorBrown {
         for (int i = 1; i < n; i++) {
             double radius = r.nextDouble();
             double angle = a.nextDouble();
-            double vx = Math.sqrt(radius) * 0.1 * Math.cos(angle * 2 * Math.PI);
-            double vy = Math.sqrt(radius) * 0.1 * Math.sin(angle * 2 * Math.PI);
+            double vx = Math.sqrt(radius) * maxSpeed * Math.cos(angle * 2 * Math.PI);
+            double vy = Math.sqrt(radius) * maxSpeed * Math.sin(angle * 2 * Math.PI);
             double x, y;
             do {
                 x = r.nextDouble() * 0.49 + 0.005;
@@ -134,8 +135,12 @@ public class SimulatorBrown {
             double time = this.findNextCollision();
             this.evolveParticles(time);
             if(collIndex1 == 0 && collIndex2 < 0){
-                calcPositions(index, totalTimeFixed - totalTime);
+                System.out.println(totalTime);
+                System.out.println(System.nanoTime() - timen);
                 Main.printOvito(steps, colls, index, n, totalTimeFixed - totalTime);
+                if(index == 0){
+                    calcPositions(index, totalTimeFixed - totalTime);
+                }
                 return;
             }
             this.makeCollision();
@@ -149,8 +154,10 @@ public class SimulatorBrown {
         }
         System.out.println(totalTime);
         System.out.println(System.nanoTime() - timen);
+        if(index == 0){
+            calcPositions(index, totalTimeFixed - totalTime);
+        }
         Main.printOvito(steps, colls, index, n, totalTimeFixed - totalTime);
-        calcPositions(index, totalTimeFixed - totalTime);
     }
 
     public void calcPositions(int index, double totTime) {
@@ -162,9 +169,11 @@ public class SimulatorBrown {
             NumberFormat f = new DecimalFormat("#0.000000");
             int counter = -1;
             for(ArrayList<BrownParticle> a : steps) {
-                    out.println(a.size());
+                    out.println(a.size() + 2);
                     out.println();
-                    for (BrownParticle p : a) {
+                out.println("-1 0 0 0 1");
+                out.println("-2 0.5 0.5 0 1");
+                for (BrownParticle p : a) {
                         if(counter >= 0 && (colls.get(counter).getIndex1() == p.getIndex() || colls.get(counter).getIndex2() == p.getIndex())) {
                             out.println(p.getIndex() + " " + f.format(p.getX()) + " " + f.format(p.getY()) + " " + p.getRadius() + " 1");
                         } else {

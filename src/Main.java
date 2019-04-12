@@ -10,11 +10,11 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        SimulatorBrown sb = new SimulatorBrown(100);
+        SimulatorBrown sb = new SimulatorBrown(500, 0.1
+        );
         for (int i = 0; i < 10; i++) {
             System.out.println(i);
             sb.simulate(600, i);
-
         }
 //        printOvito(sb.getSteps(), sb.getColls());
     }
@@ -74,7 +74,9 @@ public class Main {
         for (Collision coll : colls){
             sbp.append(coll.getTimeOf()).append('\n');
             BrownParticle bp = steps.get(counter).get(0);
+            BrownParticle bp1 = steps.get(counter).get(1);
             sbp.append(bp.getIndex()).append(" ").append(f.format(bp.getX())).append(' ').append(f.format(bp.getY())).append('\n');
+            sbp.append(bp1.getIndex()).append(" ").append(f.format(bp1.getX())).append(' ').append(f.format(bp1.getY())).append('\n');
             BrownParticle coll1 = steps.get(counter).get(coll.getIndex1());
             sbp.append(coll1.getIndex()).append(' ').append(f.format(coll1.getVx())).append(' ').append(f.format(coll1.getVy())).append('\n');
             if(coll.getIndex2() >= 0) {
