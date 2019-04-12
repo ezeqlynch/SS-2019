@@ -66,6 +66,7 @@ if __name__ == "__main__":
         nt = staticFile.readline()
         if(nt == ""):
             break
+        staticFile.readline()
         nextTime = float(nt)
         timeTaken = nextTime-currentTime
         currentTime = nextTime
