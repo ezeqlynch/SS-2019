@@ -21,6 +21,11 @@ def argumentParser():
       help="Path to the static data file.",
       default='data/test.xyz'
   )
+  parser.add_argument(
+      '--name',
+      help="Path to the static data file.",
+      default='100N'
+  )
   return parser
 
 
@@ -60,9 +65,10 @@ if __name__ == "__main__":
         pos = staticFile.readline().split(' ')
         x.append(float(pos[1]))
         y.append(float(pos[2]))
-        staticFile.readline()
-        staticFile.readline()
-        staticFile.readline()
+        staticFile.readline() #particula chica
+        staticFile.readline()  # choque 1
+        staticFile.readline()  # choque 2
+        staticFile.readline()  # blank
     staticFile.close()
 
     # Plot histogram data
@@ -79,6 +85,9 @@ if __name__ == "__main__":
     # ax.title('Camino recorrido por particula grande')
     ax.set_xlim(xmin=0.0, xmax=0.5)
     ax.set_ylim(ymin=0.0, ymax=0.5)
-    
+    plt.title('Movimiento de la particula grande en el espacio 2D')
+    plt.savefig(parsedArgs.staticFile + 'bigPath' +
+                parsedArgs.name + '.png', bbox_inches='tight')
+
     # ax.set_axis_off()
     plt.show()

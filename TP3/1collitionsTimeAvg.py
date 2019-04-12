@@ -27,7 +27,7 @@ def argumentParser():
   parser.add_argument(
       '--name',
       help="Path to the static data file.",
-      default="Simulación 2233"
+      default="100N"
   )
   parser.add_argument(
       '--delta',
@@ -90,6 +90,7 @@ if __name__ == "__main__":
                 staticFile.readline()
                 staticFile.readline()
                 staticFile.readline()
+                staticFile.readline()
             staticFile.close()
             allParticles.append(particles)
             allCollisionTimes.append(collisionTimes)
@@ -115,9 +116,9 @@ if __name__ == "__main__":
     
 
     # Plot histogram data
-    plt.title('Promedio colisiones x tiempo.')
+    plt.title('Promedio de colisiones / tiempo.')
     plt.ylabel('Cantidad promedio')
-    plt.xlabel('Tiempo')
+    plt.xlabel('Tiempo (s)')
     plt.hist(avgCollisionTimes, bins=30)
     # plt.errorbar(range(len(collisionTimes)),
     #                 collisionTimes, yerr=avgSD, fmt='none', ecolor='pink')
@@ -135,4 +136,6 @@ if __name__ == "__main__":
     # first_legend = plt.legend(
     #     handles=[title, black_patch, pink_patch, blue_patch], loc=0)
     plt.tight_layout()
+    plt.savefig(parsedArgs.staticFile + 'collitionsTimeAvg' +
+                parsedArgs.name + '.png', bbox_inches='tight')
     plt.show()

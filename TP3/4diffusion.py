@@ -25,7 +25,7 @@ def argumentParser():
   parser.add_argument(
       '--name',
       help="Path to the static data file.",
-      default="100N"
+      default=0.16
   )
 
   parser.add_argument(
@@ -64,43 +64,38 @@ if __name__ == "__main__":
     particleNum = int(staticFile.readline())
     staticFile.readline()
     for i in range(particleNum):
-        rawParticle = staticFile.readline().split(' ')
-        particles[int(rawParticle[0])] = Particle(rawParticle[0],
-                                                  rawParticle[1], rawParticle[2],
-                                                  rawParticle[4], rawParticle[5],
-                                                  rawParticle[3])
+        staticFile.readline()
+        # rawParticle = staticFile.readline().split(' ')
+        # particles[int(rawParticle[0])] = Particle(rawParticle[0],
+        #                                             rawParticle[1], rawParticle[2],
+        #                                             rawParticle[4], rawParticle[5],
+        #                                             rawParticle[3])
     staticFile.readline()
 
     collisionTimes = []
+    collisionOnDeltaTime = dict()
 
     #PARSE COLLISIONS
     collisionNum = int(staticFile.readline())
-    if(not parsedArgs.start):
-        for i in range(collisionNum):
-            if(i > (5/6)*collisionNum):
-                break
-            print("collision %i of %i" % (i+1, collisionNum), end="\r")
-            nt = staticFile.readline()
-            if(nt == ""):
-                break
-            staticFile.readline()  # Particula grande
-            staticFile.readline()  # Particula chica
-            
-            rawCollision = staticFile.readline().split(' ')
-            rawCollision[0] = int(rawCollision[0])
-            if(rawCollision[0] < 0):
-                break
-            particles[int(rawCollision[0])].setVelX(rawCollision[1])
-            particles[int(rawCollision[0])].setVelY(rawCollision[2])
-
-            rawCollision = staticFile.readline().split(' ')
-            rawCollision[0] = int(rawCollision[0])
-            if(rawCollision[0] < 0):
-                staticFile.readline()  # empty line
-                continue
-            particles[int(rawCollision[0])].setVelX(rawCollision[1])
-            particles[int(rawCollision[0])].setVelY(rawCollision[2])
-            staticFile.readline() #empty line
+    currentTime = 0
+    xBig = []
+    yBig = []
+    xSmall = []
+    ySmall = []
+    for i in range(collisionNum):
+        print("collision %i of %i" % (i+1, collisionNum), end="\r")
+        nt = staticFile.readline()
+        if(nt == ""):
+            break
+        pos = staticFile.readline().split(' ')
+        xBig.append(float(pos[1]))
+        yBig.append(float(pos[2]))
+        pos = staticFile.readline().split(' ')
+        xSmall.append(float(pos[1]))
+        ySmall.append(float(pos[2]))
+        staticFile.readline()
+        staticFile.readline()
+        staticFile.readline()
     staticFile.close()
 
     # Calculate Velocity
@@ -135,6 +130,4 @@ if __name__ == "__main__":
     # first_legend = plt.legend(
     #     handles=[title, black_patch, pink_patch, blue_patch], loc=0)
     plt.tight_layout()
-    plt.savefig(parsedArgs.staticFile + 'velocityModule' +
-                parsedArgs.name + '.png', bbox_inches='tight')
     plt.show()

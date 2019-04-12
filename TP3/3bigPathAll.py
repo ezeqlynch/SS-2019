@@ -23,6 +23,11 @@ def argumentParser():
       help="Path to the static data file.",
       default='data/test.xyz'
   )
+  parser.add_argument(
+      '--name',
+      help="Path to the static data file.",
+      default='100N'
+  )
   return parser
 
 
@@ -65,9 +70,10 @@ if __name__ == "__main__":
                 pos = staticFile.readline().split(' ')
                 x.append(float(pos[1]))
                 y.append(float(pos[2]))
-                staticFile.readline()
-                staticFile.readline()
-                staticFile.readline()
+                staticFile.readline()  # particula chica
+                staticFile.readline()  # choque 1
+                staticFile.readline()  # choque 2
+                staticFile.readline()  # blank
             allX.append(x)
             allY.append(y)
             staticFile.close()
@@ -110,8 +116,10 @@ if __name__ == "__main__":
     # ax.title('Camino recorrido por particula grande')
     ax.set_xlim(left=0.0, right=0.5)
     ax.set_ylim(bottom=0.0, top=0.5)
-    plt.title('Movimiento de la particula grande en el espacio 2D')
+    plt.title('Movimiento de las particulas grandes en el espacio 2D')
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
+    plt.savefig(parsedArgs.staticFile + 'bigPathAll' +
+                parsedArgs.name + '.png', bbox_inches='tight')
     # ax.set_axis_off()
     plt.show()

@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.ticker as ticker
 from particle import Particle
+import numpy as np
 import math
 
 
@@ -24,12 +25,17 @@ def argumentParser():
   parser.add_argument(
       '--name',
       help="Path to the static data file.",
-      default="Simulación 2233"
+      default="100N"
   )
   parser.add_argument(
       '--delta',
       help="Path to the static data file.",
       default=1.0/100
+  )
+  parser.add_argument(
+      '--density',
+      help="Velocity at start\n\n",
+      action='store_true'
   )
 
   return parser
@@ -78,6 +84,7 @@ if __name__ == "__main__":
         staticFile.readline()
         staticFile.readline()
         staticFile.readline()
+        staticFile.readline()
     staticFile.close()
     
     # keys = list(collisionOnDeltaTime.keys())
@@ -93,12 +100,16 @@ if __name__ == "__main__":
     # xAxis = [i * deltaTime for i in xAxis]
 
     # Plot histogram data
-    plt.title('Colisiones x tiempo.')
+    plt.title('Cantidad de Colisiones / tiempo')
     plt.ylabel('Cantidad')
-    plt.xlabel('Tiempo')
+    plt.xlabel('Tiempo (s)')
     # plt.errorbar(range(len(averages)),
     #                 averages, yerr=sd, fmt='none', ecolor='pink')
-    plt.hist(collisionTimes, bins=30)
+    if(parsedArgs.density):
+        weights = np.ones_like(collisionTimes)/float(len(collisionTimes))
+        y, x, _ = plt.hist(collisionTimes, bins=30, weights=weights)
+    else:
+        plt.hist(collisionTimes, bins=30)
     # plt.xticks(yAxis, xAxis)
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
@@ -113,4 +124,5 @@ if __name__ == "__main__":
     # first_legend = plt.legend(
     #     handles=[title, black_patch, pink_patch, blue_patch], loc=0)
     plt.tight_layout()
+    plt.savefig(parsedArgs.staticFile + 'collitionsTime'+ parsedArgs.name +'.png', bbox_inches='tight')
     plt.show()
