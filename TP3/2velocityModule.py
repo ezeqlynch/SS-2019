@@ -110,7 +110,10 @@ if __name__ == "__main__":
             math.sqrt(particles[key].velX ** 2+particles[key].velY ** 2))
 
     # Plot histogram data
-    plt.title('Densidad de probabilidad de velocidad en el ultimo tercio.')
+    if(not parsedArgs.start):
+        plt.title('Densidad de probabilidad de velocidad en el ultimo tercio.')
+    else:
+        plt.title('Densidad de probabilidad de velocidad en el comienzo.')
     plt.ylabel('Densidad')
     plt.xlabel('Velocidad (unidades por segundo)')
     # plt.errorbar(range(len(averages)),
@@ -135,6 +138,11 @@ if __name__ == "__main__":
     # first_legend = plt.legend(
     #     handles=[title, black_patch, pink_patch, blue_patch], loc=0)
     plt.tight_layout()
-    plt.savefig(parsedArgs.staticFile + 'velocityModule' +
+    if(not parsedArgs.start):
+        plt.savefig(parsedArgs.staticFile + 'velocityModuleEnd' +
                 parsedArgs.name + '.png', bbox_inches='tight')
+    else:
+        plt.savefig(parsedArgs.staticFile + 'velocityModuleStart' +
+                parsedArgs.name + '.png', bbox_inches='tight')
+
     plt.show()

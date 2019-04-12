@@ -100,15 +100,19 @@ if __name__ == "__main__":
     # xAxis = [i * deltaTime for i in xAxis]
 
     # Plot histogram data
-    plt.title('Cantidad de Colisiones / tiempo')
-    plt.ylabel('Cantidad')
-    plt.xlabel('Tiempo (s)')
+    
     # plt.errorbar(range(len(averages)),
     #                 averages, yerr=sd, fmt='none', ecolor='pink')
     if(parsedArgs.density):
+        plt.title('Probabilidad de Colisiones / tiempo')
+        plt.ylabel('Probabilidad')
+        plt.xlabel('Tiempo (s)')
         weights = np.ones_like(collisionTimes)/float(len(collisionTimes))
         y, x, _ = plt.hist(collisionTimes, bins=30, weights=weights)
     else:
+        plt.title('Cantidad de Colisiones / tiempo')
+        plt.ylabel('Cantidad')
+        plt.xlabel('Tiempo (s)')
         plt.hist(collisionTimes, bins=30)
     # plt.xticks(yAxis, xAxis)
     plt.grid(b=True, which='major', linestyle='-')
@@ -124,5 +128,8 @@ if __name__ == "__main__":
     # first_legend = plt.legend(
     #     handles=[title, black_patch, pink_patch, blue_patch], loc=0)
     plt.tight_layout()
-    plt.savefig(parsedArgs.staticFile + 'collitionsTime'+ parsedArgs.name +'.png', bbox_inches='tight')
+    if(parsedArgs.density):
+        plt.savefig(parsedArgs.staticFile + 'collitionsTime'+ parsedArgs.name +'.png', bbox_inches='tight')
+    else:
+        plt.savefig(parsedArgs.staticFile + 'collitionsDensityTime'+ parsedArgs.name +'.png', bbox_inches='tight')
     plt.show()
