@@ -98,20 +98,38 @@ if __name__ == "__main__":
         staticFile.readline()
     staticFile.close()
 
+
+
+
     # Calculate Velocity
-    velocityModules = []
-    for key in particles:
-        velocityModules.append(
-            math.sqrt(particles[key].velX ** 2+particles[key].velY ** 2))
+    distanceFromCenter = []
+    despCuadMed = []
+    despCuadMed.append(0)
+    for i in range(len(xBig)):
+        distanceFromCenter.append(
+            math.sqrt((xBig[i] - 0.25) ** 2 +
+                      (yBig[i] - 0.25) ** 2))
+
+    for i in range(0, len(distanceFromCenter)):
+        despCuadMed.append(despCuadMed[i-1] + 1/len(distanceFromCenter) * (distanceFromCenter[i] ** 2))
+    print(despCuadMed)
+    
+    # diff = np.diff(distanceFromCenter)  # this calculates r(t + dt) - r(t)
+    # diff_sq = diff**2
+    # MSD = np.mean(diff_sq)
+    # print(diff_sq)
 
     # Plot histogram data
-    plt.title('Densidad de probabilidad de velocidad en el ultimo tercio.')
-    plt.ylabel('Densidad')
-    plt.xlabel('Velocidad (unidades por segundo)')
+    plt.title('Desplazamiento cuadratico medio en base a la colision.')
+    plt.ylabel('Desplazamiento cuadratico medio')
+    plt.xlabel('Numero de colision')
     # plt.errorbar(range(len(averages)),
     #                 averages, yerr=sd, fmt='none', ecolor='pink')
-    weights = np.ones_like(velocityModules)/float(len(velocityModules))
-    y, x, _ = plt.hist(velocityModules, bins=30, weights=weights)
+    # weights = np.ones_like(velocityModules)/float(len(velocityModules))
+    # y, x, _ = plt.hist(velocityModules, bins=30, weights=weights)
+
+    plt.plot(range(len(despCuadMed)), despCuadMed)
+
     # plt.xticks(yAxis, xAxis)
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
