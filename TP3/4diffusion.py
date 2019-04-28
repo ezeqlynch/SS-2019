@@ -107,8 +107,8 @@ if __name__ == "__main__":
     despCuadMed.append(0)
     for i in range(len(xBig)):
         distanceFromCenter.append(
-            math.sqrt((xBig[i] - 0.25) ** 2 +
-                      (yBig[i] - 0.25) ** 2))
+            (xBig[i] - 0.25) ** 2 +
+                (yBig[i] - 0.25) ** 2)
 
     for i in range(0, len(distanceFromCenter)):
         despCuadMed.append(despCuadMed[i-1] + 1/len(distanceFromCenter) * (distanceFromCenter[i] ** 2))
