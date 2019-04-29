@@ -150,7 +150,7 @@ public class DampedHarmonicMotion {
 
         // Calculate new position and predicted velocity
         double newPX = current.getX() + current.getVx()*deltaTime + ( (2.0/3.0) * newAX  - (1.0/6.0) * prevAX ) * Math.pow(deltaTime, 2);
-        double predictedVX = current.getVx() + (2.0/3.0) * newAX * deltaTime - (1.0/2.0) * prevAX * deltaTime;
+        double predictedVX = current.getVx() + (3.0/2.0) * newAX * deltaTime - (1.0/2.0) * prevAX * deltaTime;
 
         // Update armonicParticle with new position and predicted velocity
         current = new WeightedParticle( current.getIndex(), newPX, 0, predictedVX, 0,0,0, current.getRadius(), current.getMass());
@@ -168,7 +168,12 @@ public class DampedHarmonicMotion {
         double expTerm = Math.exp((-gamma) * (currentTime+deltaTime));
         double cosineTerm = Math.cos(Math.sqrt(w - gamma*gamma) * (currentTime+deltaTime));
         double posX = A * expTerm * cosineTerm;
-        current = new WeightedParticle( current.getIndex(), posX, 0, 0, 0,0,0, current.getRadius(),current.getMass());
+
+        double sineTerm = Math.sin(Math.sqrt(w - gamma*gamma) * (currentTime+deltaTime));
+        double velX = (-1) * gamma * A * expTerm * cosineTerm + Math.sqrt(w - gamma*gamma) * A * expTerm * -sineTerm;
+
+
+        current = new WeightedParticle( current.getIndex(), posX, 0, velX, 0,0,0, current.getRadius(),current.getMass());
     }
 
     private double calculateXForce(WeightedParticle p) {
