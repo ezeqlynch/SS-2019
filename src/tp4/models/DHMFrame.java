@@ -8,12 +8,16 @@ public class DHMFrame {
     public double timestamp;
     public WeightedParticle particle;
 
-    private static NumberFormat formatter = new DecimalFormat("#0.000");
+    private static NumberFormat formatter = new DecimalFormat("#0.00000");
 
 
     public DHMFrame(double timestamp, WeightedParticle particle) {
         this.timestamp = timestamp;
         this.particle = particle;
+    }
+
+    public String getX() {
+        return formatter.format(particle.getX());
     }
 
     @Override

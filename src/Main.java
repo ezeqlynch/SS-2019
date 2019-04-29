@@ -10,8 +10,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        SimulatorBrown sb = new SimulatorBrown(500, 0.1
-        );
+        SimulatorBrown sb = new SimulatorBrown(500, 0.1);
         for (int i = 0; i < 10; i++) {
             System.out.println(i);
             sb.simulate(600, i);
