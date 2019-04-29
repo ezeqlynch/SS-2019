@@ -1,11 +1,42 @@
 package tp4;
 
 import tp4.models.IntegrationMethod;
+import tp4.models.WeightedParticle;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class TP4A {
 
     public static void main(String[] args) {
         double deltaTime = 0.005;
+
+        LennardJonesGrid g = new LennardJonesGrid(400, 5);
+        ArrayList<WeightedParticle> ps = new ArrayList<>();
+
+        ps.add(new WeightedParticle(0, 199.0, 150.0, 0, 0, 0, 0, 0.1, 0.1));
+        Random a = new Random();
+        Random r = new Random();
+        for (int i = 1; i < 10000; i++) {
+            double angle = a.nextDouble();
+            double vx = 10.0 * Math.cos(angle * 2 * Math.PI);
+            double vy = 10.0 * Math.sin(angle * 2 * Math.PI);
+            double x, y;
+            x = r.nextDouble() * 400;
+            y = r.nextDouble() * 400;
+            ps.add(new WeightedParticle(i, x, y, vx, vy, 0, 0, 0.1,  0.1));
+        }
+        g.populate(ps);
+
+        g.calculateVecins();
+
+
         DampedHarmonicMotion analytic = new DampedHarmonicMotion(deltaTime, IntegrationMethod.ANALYTIC);
         DampedHarmonicMotion verlet = new DampedHarmonicMotion(deltaTime, IntegrationMethod.VERLET_LEAP_FROG);
         DampedHarmonicMotion beeman = new DampedHarmonicMotion(deltaTime, IntegrationMethod.BEEMAN);
@@ -43,5 +74,10 @@ public class TP4A {
         System.out.println(sbx2);
         System.out.println(sbx3);
         System.out.println(sbx4);
+
+
+
+
+
     }
 }

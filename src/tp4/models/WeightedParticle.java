@@ -2,10 +2,10 @@ package tp4.models;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 public class WeightedParticle {
 
-    //-1 left, -2 right, -3 up, -4 down (walls)
     private int index;
     private double x;
     private double y;
@@ -16,6 +16,8 @@ public class WeightedParticle {
 
     private double radius;
     private double mass;
+
+    private ArrayList<WeightedParticle> vecins;
 
     private static NumberFormat formatter = new DecimalFormat("#0.000");
 
@@ -29,6 +31,7 @@ public class WeightedParticle {
         this.ay = ay;
         this.radius = radius;
         this.mass = mass;
+        this.vecins = new ArrayList<>();
     }
 
     public double getX() {
@@ -97,6 +100,43 @@ public class WeightedParticle {
 
     public int getIndex() {
         return index;
+    }
+
+    public int getCellCol(double L, int M) {
+        return (int) Math.floor(x / (L / (double)M));
+    }
+
+    public int getCellRow(double L, int M) {
+        return (int) Math.floor(y / (L / (double)M));
+    }
+
+    public double getDistance(WeightedParticle op) {
+        return Math.sqrt((Math.pow(x - op.getX(), 2)) + Math.pow(y - op.getY(), 2));
+    }
+
+    public void addVecins(ArrayList<WeightedParticle> vecins, double Rc) {
+        for(WeightedParticle p: vecins){
+            if (getDistance(p) - 2 * radius < Rc) {
+                p.addVecin(this);
+                this.vecins.add(p);
+            }
+        }
+    }
+
+    public void addVecin(WeightedParticle p) {
+        this.vecins.add(p);
+    }
+
+    public void addSelfVecins(ArrayList<WeightedParticle> vecins, double Rc) {
+        for(WeightedParticle p: vecins){
+            if(p != this && getDistance(p) - 2 * radius < Rc) {
+                addVecin(p);
+            }
+        }
+    }
+
+    public ArrayList<WeightedParticle> getVecins() {
+        return vecins;
     }
 
     @Override
