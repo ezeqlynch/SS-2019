@@ -147,17 +147,25 @@ public class DampedHarmonicMotion {
 
     private void beemanUpdate() {
         double newAX = calculateXAcceleration(current);
+        double tempVX = current.getVx();
 
         // Calculate new position and predicted velocity
-        double newPX = current.getX() + current.getVx()*deltaTime + ( (2.0/3.0) * newAX  - (1.0/6.0) * prevAX ) * Math.pow(deltaTime, 2);
-        double predictedVX = current.getVx() + (3.0/2.0) * newAX * deltaTime - (1.0/2.0) * prevAX * deltaTime;
+        double newPX = current.getX()
+                + current.getVx()*deltaTime
+                + ((2.0/3.0) * newAX  - prevAX/6.0) * Math.pow(deltaTime, 2);
+        double predictedVX = current.getVx()
+                + (3.0/2.0) * newAX * deltaTime
+                - (1.0/2.0) * prevAX * deltaTime;
 
         // Update armonicParticle with new position and predicted velocity
-        current = new WeightedParticle( current.getIndex(), newPX, 0, predictedVX, 0,0,0, current.getRadius(), current.getMass());
+        current = new WeightedParticle( current.getIndex(), newPX, 0, predictedVX, 0, newAX,0, current.getRadius(), current.getMass());
 
         // Calculate t+DT acceleration
         double fAx = calculateXAcceleration(current);
-        double newVX = current.getVx() + (1.0/3.0) * fAx * deltaTime + (5.0/6.0) * newAX * deltaTime - (1.0/6.0) * prevAX * deltaTime;
+        double newVX = tempVX
+                + (1.0/3.0) * fAx * deltaTime
+                + (5.0/6.0) * newAX * deltaTime
+                - (1.0/6.0) * prevAX * deltaTime;
         // Update particle with aproximated speed
         current.setVx(newVX);
 
@@ -172,8 +180,9 @@ public class DampedHarmonicMotion {
         double sineTerm = Math.sin(Math.sqrt(w - gamma*gamma) * (currentTime+deltaTime));
         double velX = (-1) * gamma * A * expTerm * cosineTerm + Math.sqrt(w - gamma*gamma) * A * expTerm * -sineTerm;
 
+        double aX = (-1)*w*posX;
 
-        current = new WeightedParticle( current.getIndex(), posX, 0, velX, 0,0,0, current.getRadius(),current.getMass());
+        current = new WeightedParticle( current.getIndex(), posX, 0, velX, 0,aX,0, current.getRadius(),current.getMass());
     }
 
     private double calculateXForce(WeightedParticle p) {

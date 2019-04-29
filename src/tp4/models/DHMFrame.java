@@ -18,6 +18,6 @@ public class DHMFrame {
 
     @Override
     public String toString() {
-        return formatter.format(timestamp) +"s: " + particle.toString();
+        return formatter.format(timestamp) +"s: " + particle.toStringDHM();
     }
 }

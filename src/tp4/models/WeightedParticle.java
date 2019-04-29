@@ -104,7 +104,11 @@ public class WeightedParticle {
         return "WeightedParticle<" +index +
                 "> p=(" + formatter.format(x) + "," + formatter.format(y) +
                 "), v=(" + formatter.format(vx) + "," + formatter.format(vy) +
-                "), a=" + formatter.format(ax) + "," + formatter.format(ay) +
+                "), a=(" + formatter.format(ax) + "," + formatter.format(ay) +
                 "), r=" + radius + ", m=" + mass;
+    }
+    public String toStringDHM() {
+        return "WeightedParticle<" +index +
+                "> p= " + formatter.format(x) + ", v= " + formatter.format(vx) +", a= " + formatter.format(ax);
     }
 }
