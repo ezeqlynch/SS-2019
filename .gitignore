@@ -3,3 +3,4 @@ TP3/data/*
 TP4/data/*
 .idea/*
 __pycache__/*
+out/*
