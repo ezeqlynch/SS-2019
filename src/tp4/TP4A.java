@@ -1,5 +1,6 @@
 package tp4;
 
+import tp4.models.DHMFrame;
 import tp4.models.IntegrationMethod;
 import tp4.models.WeightedParticle;
 
@@ -8,9 +9,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.List;
 
 public class TP4A {
 
@@ -79,5 +83,25 @@ public class TP4A {
 
 
 
+        printFile(analytic.frames,verlet.frames,beeman.frames,gpc5.frames);
+    }
+
+    public static void printFile (List<DHMFrame> analyticFrames,List<DHMFrame> verletFrames,List<DHMFrame> beemanFrames,List<DHMFrame> gpc5Frames) {
+        NumberFormat f = new DecimalFormat("#0.000000");
+        NumberFormat timeFormat = new DecimalFormat("#0.000");
+        StringBuilder sbp = new StringBuilder();
+        for (int i = 0; i < analyticFrames.size(); i++) {
+            sbp.append(timeFormat.format(analyticFrames.get(i).timestamp)).append(' ')
+                    .append(f.format(analyticFrames.get(i).particle.getVx())).append(' ')
+                    .append(f.format(verletFrames.get(i).particle.getVx())).append(' ')
+                    .append(f.format(beemanFrames.get(i).particle.getVx())).append(' ')
+                    .append(f.format(gpc5Frames.get(i).particle.getVx())).append('\n');
+        }
+        File file = new File("DHM.stat");
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(file,false))) {
+            writer.append(sbp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
