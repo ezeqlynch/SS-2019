@@ -19,7 +19,7 @@ import java.util.List;
 public class TP4A {
 
     public static void main(String[] args) {
-        int ej = 3;
+        int ej = 2;
         if(ej == 2){
             double deltaTime = 0.005;
             DampedHarmonicMotion analytic = new DampedHarmonicMotion(deltaTime, IntegrationMethod.ANALYTIC);
@@ -76,7 +76,8 @@ public class TP4A {
         NumberFormat f = new DecimalFormat("#0.000000");
         NumberFormat timeFormat = new DecimalFormat("#0.000");
         StringBuilder sbp = new StringBuilder();
-        sbp.append(timeFormat.format(deltaTime)).append('\n');
+        sbp.append(timeFormat.format(deltaTime)).append(' ')
+                .append(analyticFrames.size()).append('\n');
         sbp.append(f.format(calculateECM(analyticFrames,verletFrames))).append(' ')
                 .append(f.format(calculateECM(analyticFrames,beemanFrames))).append(' ')
                 .append(f.format(calculateECM(analyticFrames,gpc5Frames))).append('\n');
