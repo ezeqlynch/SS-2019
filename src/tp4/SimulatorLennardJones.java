@@ -20,12 +20,14 @@ public class SimulatorLennardJones {
     private LennardJonesGrid grid;
     private ArrayList<WeightedParticle> ps;
     private ArrayList<ArrayList<WeightedParticle>> steps;
+    private int index = 0;
 
-    public SimulatorLennardJones(int n, double initVel, double deltaTime){
+    public SimulatorLennardJones(int n, double initVel, double deltaTime, int index){
         this.n = n;
         this.initVel = initVel;
         this.deltaTime = deltaTime;
         this.steps = new ArrayList<>();
+        this.index = index;
     }
 
     public void generateParticles(){
@@ -56,7 +58,7 @@ public class SimulatorLennardJones {
     }
 
     public void simulate() {
-        int saveCounter = (int) Math.floor((1.0/deltaTime)/30.0);
+        int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/30.0)); // para q 30 farmes => 1 segundo
         System.out.println(saveCounter);
         this.generateParticles();
         steps.add(cloneList(ps));
@@ -68,6 +70,7 @@ public class SimulatorLennardJones {
             // paredes
             // actualizar las fuerzas
             sim.parallelStream().forEach(WeightedParticle::calculateTotalForce);
+            sim.parallelStream().forEach(WeightedParticle::calculatePotentialEnergyTotal);
             // actualizar posiciones y velocidades
             sim.parallelStream().forEach(this::verletLeapFrogUpdate);
 
@@ -86,9 +89,10 @@ public class SimulatorLennardJones {
             if(step % saveCounter == 0) {
                 steps.add(cloneList(sim));
             }
-            if(steps.size() > 1000){
+            if(steps.size() > 2000){
                 calcPositions();
                 steps = new ArrayList<>();
+                return;
             }
             if(step % 1000 == 0){
                 System.out.println(step);
@@ -119,7 +123,7 @@ public class SimulatorLennardJones {
     }
 
     public void calcPositions() {
-        try(FileWriter fw = new FileWriter(n + "-test-1.xyz", true);
+        try(FileWriter fw = new FileWriter(n + "-test-"+index+".xyz", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
             NumberFormat f = new DecimalFormat("#0.000");
@@ -127,7 +131,8 @@ public class SimulatorLennardJones {
                 out.println(a.size());
                 out.println();
                 for (WeightedParticle p : a) {
-                    out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()));
+                    out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()) +
+                            " " + f.format(p.getVx()) + " " + f.format(p.getVy()) + " " + f.format(p.getV()));
                 }
             }
 

@@ -20,6 +20,7 @@ public class WeightedParticle {
     private double rm;
     private double radius;
     private double mass;
+    private double v;
 
     private ArrayList<WeightedParticle> vecins;
 
@@ -146,6 +147,15 @@ public class WeightedParticle {
         return vecins;
     }
 
+    public void calculatePotentialEnergyTotal() {
+        v = vecins.parallelStream().mapToDouble(this::calculatePotentialEnergy).sum();
+    }
+
+    public double calculatePotentialEnergy(WeightedParticle p) {
+        double dist = getDistance(p);
+        return e * (Math.pow(rm / dist, 12) - 2 * Math.pow(rm / dist, 6)) + e;
+    }
+
     public double calculateForce(WeightedParticle p) {
         double dist = getDistance(p);
         return 12.0 * e/rm * (Math.pow(rm / dist, 13) - Math.pow(rm / dist, 7));
@@ -204,6 +214,7 @@ public class WeightedParticle {
         WeightedParticle c = new WeightedParticle(index, x, y, vx, vy, ax, ay, radius, mass, e, rm);
         c.setPrevVx(prevVx);
         c.setPrevVy(prevVy);
+        c.setV(v);
         return c;
     }
 
@@ -234,5 +245,13 @@ public class WeightedParticle {
 
     public void setPrevVy(double prevVy) {
         this.prevVy = prevVy;
+    }
+
+    public double getV() {
+        return v;
+    }
+
+    public void setV(double v) {
+        this.v = v;
     }
 }
