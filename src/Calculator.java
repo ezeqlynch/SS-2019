@@ -1,3 +1,5 @@
+import tp4.models.WeightedParticle;
+
 import java.util.List;
 
 public class Calculator {
@@ -6,6 +8,10 @@ public class Calculator {
         // <= pq tengo q negar la segunda parte para ver si overlapean
         // solo chequeo cuando creo de las chicas -> el radio es 0.005
         return b.stream().anyMatch(p -> Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2) <= Math.pow(0.005 + p.getRadius(), 2));
+    }
+
+    public static boolean isOverlappingLJ(double x, double y, List<WeightedParticle> b) {
+        return b.stream().anyMatch(p -> Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2) <= Math.pow(1 /*rm*/ + p.getRadius(), 2));
     }
 
     public static double timeToCollision(BrownParticle a, BrownParticle b) {

@@ -42,13 +42,13 @@ public class DampedHarmonicMotion {
         this.gamma = b/(2*m);
         this.frames = new ArrayList<>();
         this.deltaTime = deltaTime;
-        this.current = new WeightedParticle(0,A,0, (-A)*b/(2*m),0,0,0,1, m);
+        this.current = new WeightedParticle(0,A,0, (-A)*b/(2*m),0,0,0,1, m, 0, 0);
 
         this.prevInterVX = current.getVx() - this.calculateXAcceleration(current) * (deltaTime/2);
 
         double prevX =  current.getX() - current.getVx() * deltaTime;
         double prevVX = current.getVx() - this.calculateXAcceleration(current) * deltaTime;
-        prevAX = calculateXAcceleration(new WeightedParticle(-1,prevX,0,prevVX,0,0,0,1,m));
+        prevAX = calculateXAcceleration(new WeightedParticle(-1,prevX,0,prevVX,0,0,0,1,m, 0, 0));
 
 
     }
@@ -96,7 +96,7 @@ public class DampedHarmonicMotion {
                 particleXCoefficients[0], 0,
                 particleXCoefficients[1], 0,
                 particleXCoefficients[2], 0,
-                current.getRadius(), current.getMass());
+                current.getRadius(), current.getMass(), 0, 0);
     }
 
     private double[] predictCoefficientsWithGPC5 (double[] r) {
@@ -141,7 +141,7 @@ public class DampedHarmonicMotion {
         double newVX = (prevInterVX + interVX)/2;
         current = new WeightedParticle( current.getIndex(),
                 newPX, 0, newVX, 0, 0, 0,
-                current.getRadius(), current.getMass());
+                current.getRadius(), current.getMass(), 0, 0);
         prevInterVX = interVX;
     }
 
@@ -158,7 +158,7 @@ public class DampedHarmonicMotion {
                 - (1.0/2.0) * prevAX * deltaTime;
 
         // Update armonicParticle with new position and predicted velocity
-        current = new WeightedParticle( current.getIndex(), newPX, 0, predictedVX, 0, newAX,0, current.getRadius(), current.getMass());
+        current = new WeightedParticle( current.getIndex(), newPX, 0, predictedVX, 0, newAX,0, current.getRadius(), current.getMass(), 0, 0);
 
         // Calculate t+DT acceleration
         double fAx = calculateXAcceleration(current);
@@ -182,7 +182,7 @@ public class DampedHarmonicMotion {
 
         double aX = (-1)*w*posX;
 
-        current = new WeightedParticle( current.getIndex(), posX, 0, velX, 0,aX,0, current.getRadius(),current.getMass());
+        current = new WeightedParticle( current.getIndex(), posX, 0, velX, 0,aX,0, current.getRadius(),current.getMass(),0, 0);
     }
 
     private double calculateXForce(WeightedParticle p) {
