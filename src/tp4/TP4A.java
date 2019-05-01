@@ -19,85 +19,93 @@ import java.util.List;
 public class TP4A {
 
     public static void main(String[] args) {
-        double deltaTime = 0.005;
-
-        LennardJonesGrid g = new LennardJonesGrid(400, 5);
-        ArrayList<WeightedParticle> ps = new ArrayList<>();
-
-        ps.add(new WeightedParticle(0, 199.0, 150.0, 0, 0, 0, 0, 0.1, 0.1));
-        Random a = new Random();
-        Random r = new Random();
-        for (int i = 1; i < 10000; i++) {
-            double angle = a.nextDouble();
-            double vx = 10.0 * Math.cos(angle * 2 * Math.PI);
-            double vy = 10.0 * Math.sin(angle * 2 * Math.PI);
-            double x, y;
-            x = r.nextDouble() * 400;
-            y = r.nextDouble() * 400;
-            ps.add(new WeightedParticle(i, x, y, vx, vy, 0, 0, 0.1,  0.1));
+        int ej = 3;
+        if(ej == 2){
+            double deltaTime = 0.005;
+            DampedHarmonicMotion analytic = new DampedHarmonicMotion(deltaTime, IntegrationMethod.ANALYTIC);
+            DampedHarmonicMotion verlet = new DampedHarmonicMotion(deltaTime, IntegrationMethod.VERLET_LEAP_FROG);
+            DampedHarmonicMotion beeman = new DampedHarmonicMotion(deltaTime, IntegrationMethod.BEEMAN);
+            DampedHarmonicMotion gpc5 = new DampedHarmonicMotion(deltaTime, IntegrationMethod.GPC5);
+            analytic.simulate();
+            verlet.simulate();
+            beeman.simulate();
+            gpc5.simulate();
+            printFile(analytic.frames,verlet.frames,beeman.frames,gpc5.frames, deltaTime);
         }
-        g.populate(ps);
+        if (ej == 3){
+            ArrayList<Double> deltaTimes = new ArrayList<>();
+            ArrayList<Double> verletECM = new ArrayList<>();
+            ArrayList<Double> beemanECM = new ArrayList<>();
+            ArrayList<Double> gpc5ECM = new ArrayList<>();
+            for (double deltaTime = 0.00001; deltaTime < 0.075; deltaTime+=0.00001) {
+                System.out.println("Analizing: " + deltaTime + ", " + (deltaTime/0.076)*100 + "%");
+                DampedHarmonicMotion analytic = new DampedHarmonicMotion(deltaTime, IntegrationMethod.ANALYTIC);
+                DampedHarmonicMotion verlet = new DampedHarmonicMotion(deltaTime, IntegrationMethod.VERLET_LEAP_FROG);
+                DampedHarmonicMotion beeman = new DampedHarmonicMotion(deltaTime, IntegrationMethod.BEEMAN);
+                DampedHarmonicMotion gpc5 = new DampedHarmonicMotion(deltaTime, IntegrationMethod.GPC5);
+                analytic.simulate();
+                verlet.simulate();
+                beeman.simulate();
+                gpc5.simulate();
+                deltaTimes.add(deltaTime);
+                verletECM.add(calculateECM(analytic.frames,verlet.frames));
+                beemanECM.add(calculateECM(analytic.frames,beeman.frames));
+                gpc5ECM.add(calculateECM(analytic.frames,gpc5.frames));
+            }
+            printEj3(deltaTimes,verletECM,beemanECM,gpc5ECM);
 
-        g.calculateVecins();
 
-
-        DampedHarmonicMotion analytic = new DampedHarmonicMotion(deltaTime, IntegrationMethod.ANALYTIC);
-        DampedHarmonicMotion verlet = new DampedHarmonicMotion(deltaTime, IntegrationMethod.VERLET_LEAP_FROG);
-        DampedHarmonicMotion beeman = new DampedHarmonicMotion(deltaTime, IntegrationMethod.BEEMAN);
-        DampedHarmonicMotion gpc5 = new DampedHarmonicMotion(deltaTime, IntegrationMethod.GPC5);
-        analytic.simulate();
-        verlet.simulate();
-        beeman.simulate();
-        gpc5.simulate();
-        StringBuilder sbx1 = new StringBuilder();
-        StringBuilder sbx2 = new StringBuilder();
-        StringBuilder sbx3 = new StringBuilder();
-        StringBuilder sbx4 = new StringBuilder();
-        sbx1.append("x1=[");
-        sbx2.append("x2=[");
-        sbx3.append("x3=[");
-        sbx4.append("x4=[");
-        for (int i = 0; i < analytic.frames.size(); i++) {
-            sbx1.append(analytic.frames.get(i).getX()).append(",");
-            sbx2.append(verlet.frames.get(i).getX()).append(",");
-            sbx3.append(beeman.frames.get(i).getX()).append(",");
-            sbx4.append(gpc5.frames.get(i).getX()).append(",");
-            System.out.println(analytic.frames.get(i).toString());
-            System.out.println(verlet.frames.get(i).toString());
-            System.out.println(beeman.frames.get(i).toString());
-            System.out.println(gpc5.frames.get(i).toString());
-            System.out.println();
         }
-        sbx1.append("];");
-        sbx2.append("];");
-        sbx3.append("];");
-        sbx4.append("];");
-
-
-        System.out.println(sbx1);
-        System.out.println(sbx2);
-        System.out.println(sbx3);
-        System.out.println(sbx4);
-
-
-
-
-
-        printFile(analytic.frames,verlet.frames,beeman.frames,gpc5.frames);
     }
 
-    public static void printFile (List<DHMFrame> analyticFrames,List<DHMFrame> verletFrames,List<DHMFrame> beemanFrames,List<DHMFrame> gpc5Frames) {
+    public static double calculateECM(List<DHMFrame> realFrames,
+                               List<DHMFrame> predictedFrames){
+        double ecm = 0;
+        for (int i = 0; i < realFrames.size(); i++) {
+            ecm += Math.pow(predictedFrames.get(i).particle.getX()-realFrames.get(i).particle.getX(),2);
+        }
+        ecm /= realFrames.size();
+        return ecm;
+    }
+
+    public static void printFile (List<DHMFrame> analyticFrames,
+                                  List<DHMFrame> verletFrames,
+                                  List<DHMFrame> beemanFrames,
+                                  List<DHMFrame> gpc5Frames,
+                                  double deltaTime) {
         NumberFormat f = new DecimalFormat("#0.000000");
         NumberFormat timeFormat = new DecimalFormat("#0.000");
         StringBuilder sbp = new StringBuilder();
+        sbp.append(timeFormat.format(deltaTime)).append('\n');
+        sbp.append(f.format(calculateECM(analyticFrames,verletFrames))).append(' ')
+                .append(f.format(calculateECM(analyticFrames,beemanFrames))).append(' ')
+                .append(f.format(calculateECM(analyticFrames,gpc5Frames))).append('\n');
         for (int i = 0; i < analyticFrames.size(); i++) {
-            sbp.append(timeFormat.format(analyticFrames.get(i).timestamp)).append(' ')
-                    .append(f.format(analyticFrames.get(i).particle.getVx())).append(' ')
-                    .append(f.format(verletFrames.get(i).particle.getVx())).append(' ')
-                    .append(f.format(beemanFrames.get(i).particle.getVx())).append(' ')
-                    .append(f.format(gpc5Frames.get(i).particle.getVx())).append('\n');
+            sbp.append(f.format(analyticFrames.get(i).particle.getX())).append(' ')
+                .append(f.format(verletFrames.get(i).particle.getX())).append(' ')
+                .append(f.format(beemanFrames.get(i).particle.getX())).append(' ')
+                .append(f.format(gpc5Frames.get(i).particle.getX())).append('\n');
         }
-        File file = new File("DHM.stat");
+        File file = new File("DHM_" + timeFormat.format(deltaTime) + ".stat");
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(file,false))) {
+            writer.append(sbp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void printEj3 (List<Double> times,
+                                  List<Double> verletECM,
+                                  List<Double> beemanECM,
+                                  List<Double> gpc5ECM) {
+        StringBuilder sbp = new StringBuilder();
+        for (int i = 0; i < times.size(); i++) {
+            sbp.append(times.get(i)).append(' ')
+                    .append(verletECM.get(i)).append(' ')
+                    .append(beemanECM.get(i)).append(' ')
+                    .append(gpc5ECM.get(i)).append('\n');
+        }
+        File file = new File("DHM_ECM_" + times.get(0) + "-" + times.get(times.size()-1) + ".stat");
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(file,false))) {
             writer.append(sbp);
         } catch (IOException e) {
