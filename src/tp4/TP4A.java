@@ -19,7 +19,7 @@ import java.util.List;
 public class TP4A {
 
     public static void main(String[] args) {
-        int ej = 2;
+        int ej = 2; //CHANGE TO RUN EJ 2 OR 3
         if(ej == 2){
             double deltaTime = 0.005;
             DampedHarmonicMotion analytic = new DampedHarmonicMotion(deltaTime, IntegrationMethod.ANALYTIC);

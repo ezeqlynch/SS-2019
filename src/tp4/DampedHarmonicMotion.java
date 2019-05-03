@@ -33,8 +33,7 @@ public class DampedHarmonicMotion {
     private double prevAX;
     private double[] particleXCoefficients = null;
 
-    private final double[] GPC5_COEFFICIENTS = new double[]
-            { 3.0/16,    251.0/360,  1.,    11.0/18,  1.0/6,   1.0/60   };
+    private final double[] GPC5_COEFFICIENTS = new double[]{ 3.0/16, 251.0/360, 1.0, 11.0/18, 1.0/6, 1.0/60 };
 
     public DampedHarmonicMotion(double deltaTime, IntegrationMethod method) {
         this.method = method;
