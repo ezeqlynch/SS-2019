@@ -18,7 +18,7 @@ public class DampedHarmonicMotion {
     private double k = 10000; //constante resorte
     private double A = 1; //amplitud
 
-    private double w;
+    private double w2;
     private double gamma;
 
     private double currentTime = 0;
@@ -37,7 +37,7 @@ public class DampedHarmonicMotion {
 
     public DampedHarmonicMotion(double deltaTime, IntegrationMethod method) {
         this.method = method;
-        this.w = k/m;
+        this.w2 = k/m;
         this.gamma = b/(2*m);
         this.frames = new ArrayList<>();
         this.deltaTime = deltaTime;
@@ -79,10 +79,10 @@ public class DampedHarmonicMotion {
 
     private void gearPredictorCorrector5Update(){
         if (particleXCoefficients == null)
-            particleXCoefficients = initializeGPCO5Axis(current.getMass(), current.getX(), current.getVx());
+            particleXCoefficients = this.initializeCoefficientsGPC5( current.getX(), current.getVx());
 
         // predict
-        double[] predictedXCoefficients = predictCoefficientsWithGPC5(particleXCoefficients);
+        double[] predictedXCoefficients = this.predictCoefficientsWithGPC5(particleXCoefficients);
 
         // evaluate deltaR2X
         double AX = (-1*k*predictedXCoefficients[0] - b*predictedXCoefficients[1])/m;
@@ -99,43 +99,43 @@ public class DampedHarmonicMotion {
     }
 
     private double[] predictCoefficientsWithGPC5 (double[] r) {
-        double t1 = deltaTime;
-        double t2 = Math.pow(deltaTime, 2) / 2;
-        double t3 = Math.pow(deltaTime, 3) / 6;
-        double t4 = Math.pow(deltaTime, 4) / 24;
-        double t5 = Math.pow(deltaTime, 5) / 120;
-
+        double tc1 = deltaTime;
+        double tc2 = Math.pow(deltaTime, 2) / 2;
+        double tc3 = Math.pow(deltaTime, 3) / 6;
+        double tc4 = Math.pow(deltaTime, 4) / 24;
+        double tc5 = Math.pow(deltaTime, 5) / 120;
         return new double[] {
-                r[0] + r[1] * t1 + r[2] * t2 + r[3] * t3 + r[4] * t4 + r[5] * t5,  // position
-                r[1] + r[2] * t1 + r[3] * t2 + r[4] * t3 + r[5] * t4,            // speed
-                r[2] + r[3] * t1 + r[4] * t2 + r[5] * t4,                      // acceleration
-                r[3] + r[4] * t1 + r[5] * t2,                                // r3
-                r[4] + r[5] * t1,                                          // r4
-                r[5],                                                    // r5
-        };
+                r[0] + r[1]*tc1 + r[2]*tc2 + r[3]*tc3 + r[4]*tc4 + r[5]*tc5,
+                r[1] + r[2]*tc1 + r[3]*tc2 + r[4]*tc3 + r[5]*tc4,
+                r[2] + r[3]*tc1 + r[4]*tc2 + r[5]*tc3,
+                r[3] + r[4]*tc1 + r[5]*tc2,
+                r[4] + r[5]*tc1,
+                r[5]};
     }
 
     private double[] correctCoefficientsWithGPC5 (double deltaR2, double[] predictedCoefficients) {
         return new double[]{
                 predictedCoefficients[0] + GPC5_COEFFICIENTS[0] * deltaR2,
-                predictedCoefficients[1] + GPC5_COEFFICIENTS[1] * deltaR2 * 1 / Math.pow(deltaTime, 1),
-                predictedCoefficients[2] + GPC5_COEFFICIENTS[2] * deltaR2 * 2 / Math.pow(deltaTime, 2),
-                predictedCoefficients[3] + GPC5_COEFFICIENTS[3] * deltaR2 * 6 / Math.pow(deltaTime, 3),
-                predictedCoefficients[4] + GPC5_COEFFICIENTS[4] * deltaR2 * 24 / Math.pow(deltaTime, 4),
-                predictedCoefficients[5] + GPC5_COEFFICIENTS[5] * deltaR2 * 120 / Math.pow(deltaTime, 5),
-        };
+                predictedCoefficients[1] + GPC5_COEFFICIENTS[1] * deltaR2 * 1/Math.pow(deltaTime, 1),
+                predictedCoefficients[2] + GPC5_COEFFICIENTS[2] * deltaR2 * 2/Math.pow(deltaTime, 2),
+                predictedCoefficients[3] + GPC5_COEFFICIENTS[3] * deltaR2 * 6/Math.pow(deltaTime, 3),
+                predictedCoefficients[4] + GPC5_COEFFICIENTS[4] * deltaR2 * 24/Math.pow(deltaTime, 4),
+                predictedCoefficients[5] + GPC5_COEFFICIENTS[5] * deltaR2 * 120/Math.pow(deltaTime, 5)};
     }
 
-    private double[] initializeGPCO5Axis(double mass, double r0, double r1) {
-        double r2 = (-k / m) * r0 - (b / m) * r1;
-        double r3 = (-k / m) * r1 - (b / m) * r2;
-        double r4 = (-k / m) * r2 - (b / m) * r3;
-        double r5 = (-k / m) * r3 - (b / m) * r4;
+    private double[] initializeCoefficientsGPC5(double r0, double r1) {
+        double bm = b/m;
+        double r2 = (-w2)*r0 - bm*r1;
+        double r3 = (-w2)*r1 - bm*r2;
+        double r4 = (-w2)*r2 - bm*r3;
+        double r5 = (-w2)*r3 - bm*r4;
         return new double[] { r0, r1, r2, r3, r4, r5 };
     }
 
+
     private void verletLeapFrogUpdate() {
-        double interVX = prevInterVX + ((deltaTime/current.getMass())*calculateXForce(current));
+        double currentAX = calculateXAcceleration(current);
+        double interVX = prevInterVX + deltaTime*currentAX;
         double newPX = current.getX() + deltaTime*interVX;
         double newVX = (prevInterVX + interVX)/2;
         current = new WeightedParticle( current.getIndex(),
@@ -173,22 +173,22 @@ public class DampedHarmonicMotion {
 
     private void analyticUpdate() {
         double expTerm = Math.exp((-gamma) * (currentTime+deltaTime));
-        double cosineTerm = Math.cos(Math.sqrt(w - gamma*gamma) * (currentTime+deltaTime));
+        double cosineTerm = Math.cos(Math.sqrt(w2 - gamma*gamma) * (currentTime+deltaTime));
         double posX = A * expTerm * cosineTerm;
 
-        double sineTerm = Math.sin(Math.sqrt(w - gamma*gamma) * (currentTime+deltaTime));
-        double velX = (-1) * gamma * A * expTerm * cosineTerm + Math.sqrt(w - gamma*gamma) * A * expTerm * -sineTerm;
+        double sineTerm = Math.sin(Math.sqrt(w2 - gamma*gamma) * (currentTime+deltaTime));
+        double velX = (-1) * gamma * A * expTerm * cosineTerm + Math.sqrt(w2 - gamma*gamma) * A * expTerm * -sineTerm;
 
-        double aX = (-1)*w*posX;
+        double aX = (-1)*w2*posX;
 
         current = new WeightedParticle( current.getIndex(), posX, 0, velX, 0,aX,0, current.getRadius(),current.getMass(),0, 0);
     }
 
     private double calculateXForce(WeightedParticle p) {
-        return (-1) * k * p.getX() - b * p.getVx();
+        return (-1)*k*p.getX() - b*p.getVx();
     }
 
     private double calculateXAcceleration(WeightedParticle p) {
-        return this.calculateXForce(p) / p.getMass();
+        return this.calculateXForce(p) / m;
     }
 }

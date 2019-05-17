@@ -2,7 +2,7 @@ package tp4;
 
 public class LennardJonesMain {
     public static void main(String[] args) {
-        double deltaTime = 0.0005;
+        double deltaTime = 0.005;
 
         SimulatorLennardJones slj1 = new SimulatorLennardJones(1000, 10, deltaTime, 1);
         SimulatorLennardJones slj2 = new SimulatorLennardJones(1000, 10, deltaTime, 2);
@@ -11,9 +11,9 @@ public class LennardJonesMain {
         SimulatorLennardJones slj5 = new SimulatorLennardJones(1000, 10, deltaTime, 5);
 
         slj1.simulate();
-        slj2.simulate();
-        slj3.simulate();
-        slj4.simulate();
-        slj5.simulate();
+//        slj2.simulate();
+//        slj3.simulate();
+//        slj4.simulate();
+//        slj5.simulate();
     }
 }

@@ -21,15 +21,33 @@ public class TP4A {
     public static void main(String[] args) {
         int ej = 2; //CHANGE TO RUN EJ 2 OR 3
         if(ej == 2){
-            double deltaTime = 0.005;
+            double deltaTime = 0.01;
             DampedHarmonicMotion analytic = new DampedHarmonicMotion(deltaTime, IntegrationMethod.ANALYTIC);
             DampedHarmonicMotion verlet = new DampedHarmonicMotion(deltaTime, IntegrationMethod.VERLET_LEAP_FROG);
             DampedHarmonicMotion beeman = new DampedHarmonicMotion(deltaTime, IntegrationMethod.BEEMAN);
             DampedHarmonicMotion gpc5 = new DampedHarmonicMotion(deltaTime, IntegrationMethod.GPC5);
+            double start = 0;
+            double end = 0;
+            start = System.nanoTime();
             analytic.simulate();
+            end = System.nanoTime();
+            System.out.println("Tiempo1: " + (end-start));
+
+            start = System.nanoTime();
             verlet.simulate();
+            end = System.nanoTime();
+            System.out.println("Tiempo2: " + (end-start));
+
+            start = System.nanoTime();
             beeman.simulate();
+            end = System.nanoTime();
+            System.out.println("Tiempo3: " + (end-start));
+
+            start = System.nanoTime();
             gpc5.simulate();
+            end = System.nanoTime();
+            System.out.println("Tiempo4: " + (end-start));
+
             printFile(analytic.frames,verlet.frames,beeman.frames,gpc5.frames, deltaTime);
         }
         if (ej == 3){
@@ -73,19 +91,33 @@ public class TP4A {
                                   List<DHMFrame> beemanFrames,
                                   List<DHMFrame> gpc5Frames,
                                   double deltaTime) {
-        NumberFormat f = new DecimalFormat("#0.000000");
-        NumberFormat timeFormat = new DecimalFormat("#0.000");
+//        NumberFormat f = new DecimalFormat("#0.0000000000");
+//        NumberFormat timeFormat = new DecimalFormat("#0.0000000");
+//        StringBuilder sbp = new StringBuilder();
+//        sbp.append(timeFormat.format(deltaTime)).append(' ')
+//                .append(analyticFrames.size()).append('\n');
+//        sbp.append(f.format(calculateECM(analyticFrames,verletFrames))).append(' ')
+//                .append(f.format(calculateECM(analyticFrames,beemanFrames))).append(' ')
+//                .append(f.format(calculateECM(analyticFrames,gpc5Frames))).append('\n');
+//        for (int i = 0; i < analyticFrames.size(); i++) {
+//            sbp.append(f.format(analyticFrames.get(i).particle.getX())).append(' ')
+//                .append(f.format(verletFrames.get(i).particle.getX())).append(' ')
+//                .append(f.format(beemanFrames.get(i).particle.getX())).append(' ')
+//                .append(f.format(gpc5Frames.get(i).particle.getX())).append('\n');
+//        }
+        NumberFormat f = new DecimalFormat("#0.0000000000");
+        NumberFormat timeFormat = new DecimalFormat("#0.00000");
         StringBuilder sbp = new StringBuilder();
         sbp.append(timeFormat.format(deltaTime)).append(' ')
                 .append(analyticFrames.size()).append('\n');
-        sbp.append(f.format(calculateECM(analyticFrames,verletFrames))).append(' ')
-                .append(f.format(calculateECM(analyticFrames,beemanFrames))).append(' ')
-                .append(f.format(calculateECM(analyticFrames,gpc5Frames))).append('\n');
+        sbp.append(calculateECM(analyticFrames,verletFrames)).append(' ')
+                .append(calculateECM(analyticFrames,beemanFrames)).append(' ')
+                .append(calculateECM(analyticFrames,gpc5Frames)).append('\n');
         for (int i = 0; i < analyticFrames.size(); i++) {
-            sbp.append(f.format(analyticFrames.get(i).particle.getX())).append(' ')
-                .append(f.format(verletFrames.get(i).particle.getX())).append(' ')
-                .append(f.format(beemanFrames.get(i).particle.getX())).append(' ')
-                .append(f.format(gpc5Frames.get(i).particle.getX())).append('\n');
+            sbp.append(analyticFrames.get(i).particle.getX()).append(' ')
+                .append(verletFrames.get(i).particle.getX()).append(' ')
+                .append(beemanFrames.get(i).particle.getX()).append(' ')
+                .append(gpc5Frames.get(i).particle.getX()).append('\n');
         }
         File file = new File("DHM_" + timeFormat.format(deltaTime) + ".stat");
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(file,false))) {

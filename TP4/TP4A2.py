@@ -24,7 +24,7 @@ def argumentParser():
   parser.add_argument(
       '--method',
       help="Integration Method.",
-      default="verlet"
+      default="all"
   )
 
   return parser
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     time_frames = staticFile.readline().split(' ')
     deltaTime = float(time_frames[0])
     times = list(map(lambda num: num*deltaTime,list(range(0, int(time_frames[1])))))
-    print(times)
+    # print(times)
 
     ECMs = staticFile.readline().split(' ')
     verletECM = float(ECMs[0])
@@ -70,10 +70,11 @@ if __name__ == "__main__":
         plt.title('R sobre tiempo con metodo ' + method)
     elif(method == "all"):
         plt.errorbar(times, verlet, yerr=verletECM,
-                     color="green", label="verlet")
+                     color="green", label=("verlet, ecm=" + "{:.3E}".format(verletECM)))
         plt.errorbar(times, beeman, yerr=beemanECM,
-                     color="red", label="beeman")
-        plt.errorbar(times, gpc5, yerr=gpc5ECM, color="orange", label="gpc5")
+                     color="red", label=("beeman, ecm=" + "{:.3E}".format(beemanECM)))
+        plt.errorbar(times, gpc5, yerr=0, color="orange",
+                     label=("gpc5, ecm=" + "{:.3E}".format(gpc5ECM)))
         plt.title('R sobre tiempo con todos los metodos')
     else:
         print("Wrong method")
@@ -92,7 +93,5 @@ if __name__ == "__main__":
     # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
     # plt.tight_layout()
     plt.legend(loc="best")
-    
-    # plt.savefig(parsedArgs.staticFile + 'deltaTime' +
-    #             parsedArgs.delta + '.png', bbox_inches='tight')
+    plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
     plt.show()

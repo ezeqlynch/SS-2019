@@ -24,7 +24,7 @@ def argumentParser():
   parser.add_argument(
       '--method',
       help="Integration Method.",
-      default="verlet"
+      default="all"
   )
 
   return parser
@@ -70,6 +70,7 @@ if __name__ == "__main__":
     plt.ylabel('ECM')
     plt.xlabel('dt (s)')
     plt.yscale("log")
+    plt.xscale("log")
     plt.legend(loc='best')
 
 
@@ -79,7 +80,5 @@ if __name__ == "__main__":
     # plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(0.05))
     # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
     # plt.tight_layout()
-
-    # plt.savefig(parsedArgs.staticFile + 'deltaTime' +
-    #             parsedArgs.delta + '.png', bbox_inches='tight')
+    plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
     plt.show()
