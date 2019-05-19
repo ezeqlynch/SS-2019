@@ -6,6 +6,9 @@ import java.util.ArrayList;
 
 public class GranularParticle {
 
+
+    private static final double KN = 100000;
+    private static final double GAMMA = 70;
     private int index;
     private double x;
     private double y;
@@ -18,6 +21,7 @@ public class GranularParticle {
     private double radius;
     private double mass;
     private double v;
+    private boolean wentDown;
 
     private ArrayList<GranularParticle> vecins;
 
@@ -142,12 +146,49 @@ public class GranularParticle {
         return vecins;
     }
 
-    public double calculateForce(GranularParticle p) {
-        return 0;
+
+
+    public double calculateNormalForce(GranularParticle p, boolean xory) {
+        double distance = getDistance(p);
+        double eta = (radius + p.getRadius() - distance);
+        double enx = (p.getX() - x) / getDistance(p);
+        double eny = (p.getY() - y) / getDistance(p);
+        double vxDiff = vx - p.getVx();
+        double vyDiff = vy - p.getVy();
+        double etaDot = vxDiff * enx + vyDiff * eny;
+        return xory ? (- KN * eta - GAMMA * etaDot) * enx : (- KN * eta - GAMMA * etaDot) * eny;
+        // en = (enx, eny)
+        // et = (-eny, enx)
+        //http://wnbell.com/media/2005-07-SCA-Granular/BeYiMu2005.pdf
+        // N = x2 - x1 / ||x2 - x1|| = en versor
+        // V = v1 - v2 (vectores)
+        // Erara(puntito) = V . enx
     }
 
     public void calculateTotalForce() {
-
+        ax = vecins.parallelStream().mapToDouble(p -> calculateNormalForce(p, true)).sum() / mass;
+        ay = vecins.parallelStream().mapToDouble(p -> calculateNormalForce(p, false)).sum() / mass - 9.8;
+        //paredes
+        if(x < radius) { //pared izq
+             double eta = radius - x;
+             double enx = -1; //eny = 0
+             double etaDot = vx * enx;
+             double fn = (-KN * eta - GAMMA * etaDot) * enx;
+             ax += fn / mass;
+        } else if(x > 0.3 - radius) { //pared der
+            double eta = radius - (0.3 - x);
+            double enx = 1; //eny = 0
+            double etaDot = vx * enx;
+            double fn = (-KN * eta - GAMMA * etaDot) * enx;
+            ax += fn / mass;
+        }
+        if(!wentDown && y < radius && (x < 0.13 || x > 0.17)) { // pared abajo
+            double eta = radius - y;
+            double eny = -1; //eny = 0
+            double etaDot = vy * eny;
+            double fn = (-KN * eta - GAMMA * etaDot) * eny;
+            ay += fn / mass;
+        }
     }
 
 
@@ -155,6 +196,7 @@ public class GranularParticle {
         GranularParticle c = new GranularParticle(index, x, y, vx, vy, ax, ay, radius, mass);
         c.setPrevVx(prevVx);
         c.setPrevVy(prevVy);
+        c.setWentDown(wentDown);
         return c;
     }
 
@@ -187,4 +229,11 @@ public class GranularParticle {
         this.prevVy = prevVy;
     }
 
+    public boolean isWentDown() {
+        return wentDown;
+    }
+
+    public void setWentDown(boolean wentDown) {
+        this.wentDown = wentDown;
+    }
 }

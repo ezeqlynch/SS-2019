@@ -12,6 +12,7 @@ import java.util.Random;
 
 public class SimulatorGranular {
 
+
     private double L;
     private double W;
     private double D;
@@ -43,13 +44,16 @@ public class SimulatorGranular {
             double x, y;
             overlapped = 0;
             do{
-                x = r.nextDouble() * W + radius;
-                y = r.nextDouble() * L * 0.3 + radius; //30% superior
+                x = r.nextDouble() * (W - 2 * radius) + radius;
+                y = r.nextDouble() * (L  - 2 * radius) * 0.9 + radius; //30% superior
                 overlapped++;
             } while(isOverlappingLJ(x, y, radius, ps) && overlapped < 100);
             if(overlapped < 100)
                 ps.add(new GranularParticle(i, x, y, 0, 0, 0, -9.8, radius,  0.01));
         }
+//        ps.add(new GranularParticle(1, 0.1, 0.2, 0, 0, 0, -9.8, 0.011,  0.01));
+//        ps.add(new GranularParticle(2, 0.12, 0.1, 0, 0, 0, -9.8, 0.012,  0.01));
+
         grid.populate(ps);
         grid.calculateVecins();
         ps.parallelStream().forEach(p -> {
@@ -61,7 +65,8 @@ public class SimulatorGranular {
     }
 
     public void simulate() {
-        int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/30.0)); // para q 30 farmes => 1 segundo
+//        int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/30.0)); // para q 30 farmes => 1 segundo
+        int saveCounter = 10;
         System.out.println(saveCounter);
         this.generateParticles();
         steps.add(cloneList(ps));
@@ -86,7 +91,7 @@ public class SimulatorGranular {
             if(step % saveCounter == 0) {
                 steps.add(cloneList(sim));
             }
-            if(steps.size() > 1000){
+            if(steps.size() > 10000){
                 calcPositions();
                 steps.clear();
                 return;
@@ -107,6 +112,17 @@ public class SimulatorGranular {
         p.setVy((p.getPrevVy() + interVY)/2);
         p.setPrevVx(interVX);
         p.setPrevVy(interVY);
+        p.setWentDown(p.getY() < 0);
+        if(p.getY() < -0.4){
+            p.setY(Math.random() * 0.2 + 0.75);
+            p.setPrevVx(0);
+            p.setPrevVy(0);
+            p.setVx(0);
+            p.setVy(0);
+            p.setAx(0);
+            p.setAy(0);
+            p.setWentDown(false);
+        }
     }
 
 
@@ -119,16 +135,16 @@ public class SimulatorGranular {
     }
 
     public void calcPositions() {
-        try(FileWriter fw = new FileWriter("starting2-test-"+index+".xyz", true);
+        try(FileWriter fw = new FileWriter("starting28-test-"+index+".xyz", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
-            NumberFormat f = new DecimalFormat("#0.000");
+            NumberFormat f = new DecimalFormat("#0.00000");
             for(ArrayList<GranularParticle> a : steps) {
                 out.println(a.size());
                 out.println();
                 for (GranularParticle p : a) {
                     out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()) +
-                            " " + f.format(p.getRadius()));
+                            " " + p.getRadius());
                 }
             }
 

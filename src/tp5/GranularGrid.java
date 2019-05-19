@@ -18,8 +18,8 @@ public class GranularGrid {
         this.L = L;
         this.W = W;
         this.Rc = 0;
-        this.ML = 60;
-        this.MW = 18;
+        this.ML = 30;
+        this.MW = 9;
         this.grid = new ArrayList[ML][MW];
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[0].length; j++) {
