@@ -44,7 +44,8 @@ if __name__ == "__main__":
     allV = []
     currentV = []
 
-    
+    n2 = 107532
+    i = 0
 
     for line in staticFile:
         arr = line.split(' ')
@@ -53,42 +54,45 @@ if __name__ == "__main__":
                 continue
             allV.append(currentV)
             currentV = []
+            print(len(allV), '\r', end="")
+            i+=1
         else:
-            currentV.append(math.sqrt(float(arr[3])**2+float(arr[4])**2))
-    
+            if(i == 0 or i == n2/3 or i == 2*n2/3 or i == n2-1):
+                currentV.append(math.sqrt(float(arr[3])**2+float(arr[4])**2))
+
     allV.append(currentV)
     times = list(map(lambda num: num*deltaTime,
                      list(range(len(allV)))))
 
     plt.figure(1)
     plt.hist(allV[0], edgecolor='black', bins=bins)
-    plt.title('Distribucion de V al comienzo')
+    plt.title('Distribución de Velocidades al comienzo')
     plt.ylabel('Cantidad')
-    plt.xlabel('Rapidez (m/s)')
+    plt.xlabel('Velocidad (en módulo)')
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
 
     plt.figure(2)
-    plt.hist(allV[int(n/3)], edgecolor='black', bins=bins)
-    plt.title('Distribucion de V al primer tercio')
+    plt.hist(allV[int(n2/3)], edgecolor='black', bins=bins)
+    plt.title('Distribución de Velocidades al primer tercio')
     plt.ylabel('Cantidad')
-    plt.xlabel('Rapidez (m/s)')
+    plt.xlabel('Velocidad (en módulo)')
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
 
     plt.figure(3)
-    plt.hist(allV[int(n*2/3)], edgecolor='black', bins=bins)
-    plt.title('Distribucion de V al segundo tercio')
+    plt.hist(allV[int(n2*2/3)], edgecolor='black', bins=bins)
+    plt.title('Distribución de Velocidades al segundo tercio')
     plt.ylabel('Cantidad')
-    plt.xlabel('Rapidez (m/s)')
+    plt.xlabel('Velocidad (en módulo)')
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
 
     plt.figure(4)
     plt.hist(allV[-1], edgecolor='black', bins=bins)
-    plt.title('Distribucion de V al final')
+    plt.title('Distribución de Velocidades al final')
     plt.ylabel('Cantidad')
-    plt.xlabel('Rapidez (m/s)')
+    plt.xlabel('Velocidad (en módulo)')
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
     

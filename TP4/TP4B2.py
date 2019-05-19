@@ -58,7 +58,7 @@ if __name__ == "__main__":
             totalPE.append(pe)
         else:
             currentKE.append(0.5 * m * (float(arr[3])**2+float(arr[4])**2))
-            currentPE.append(float(arr[5]))
+            currentPE.append(float(arr[5]) - 2.0)
     ke = reduce((lambda x, y: x + y), currentKE)
     pe = reduce((lambda x, y: x + y), currentPE)
     totalKE.append(ke)
@@ -75,9 +75,9 @@ if __name__ == "__main__":
     # print(totalPE)
     # print(totalE)
 
-    plt.plot(times, totalKE, color="blue", label="KE")
-    plt.plot(times, totalPE, color="red", label="PE")
-    plt.plot(times, totalE, color="magenta", label="TE")
+    plt.plot(times, totalKE, linewidth=0.5, color="blue", label="KE")
+    plt.plot(times, totalPE, linewidth=0.5, color="red", label="PE")
+    plt.plot(times, totalE, linewidth=0.5, color="magenta", label="TE")
     plt.title('Energia sobre tiempo')
 
     # plt.axis([0, 5, -1, 1])

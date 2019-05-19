@@ -56,7 +56,7 @@ if __name__ == "__main__":
                 if(float(arr[1]) < boxXSize):
                     currentLeft+=1
         left.append(currentLeft/n)
-
+        left = left[:len(left)-2000]
         times = list(map(lambda num: num*deltaTime,
                         list(range(len(left)))))
 

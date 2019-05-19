@@ -1,6 +1,4 @@
-package tp4;
-
-import tp4.models.WeightedParticle;
+package tp5;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -12,40 +10,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class SimulatorLennardJones {
+public class SimulatorGranular {
 
-    private int n;
+    private double L;
+    private double W;
+    private double D;
     private double initVel;
     private double deltaTime;
-    private LennardJonesGrid grid;
-    private ArrayList<WeightedParticle> ps;
-    private ArrayList<ArrayList<WeightedParticle>> steps;
+    private GranularGrid grid;
+    private ArrayList<GranularParticle> ps;
+    private ArrayList<ArrayList<GranularParticle>> steps;
     private int index = 0;
 
-    public SimulatorLennardJones(int n, double initVel, double deltaTime, int index){
-        this.n = n;
-        this.initVel = initVel;
+    public SimulatorGranular(double L, double W, double D, double deltaTime, int index){
+        this.L = L;
+        this.D = D;
+        this.W = W;
         this.deltaTime = deltaTime;
         this.steps = new ArrayList<>();
         this.index = index;
     }
 
     public void generateParticles(){
-        grid = new LennardJonesGrid(200, 5);
+        grid = new GranularGrid(200, 5);
         ps = new ArrayList<>();
 
         Random a = new Random();
         Random r = new Random();
-        for (int i = 0; i < n; i++) {
-            double angle = a.nextDouble();
-            double vx = initVel * Math.cos(angle * 2 * Math.PI);
-            double vy = initVel * Math.sin(angle * 2 * Math.PI);
+        double overlapped = 0;
+        for (int i = 0; overlapped < 100; i++) {
+            double radius = (0.01 * a.nextDouble() + 0.02) / 2;
             double x, y;
+            overlapped = 0;
             do{
-                x = r.nextDouble() * 198 + 1;
-                y = r.nextDouble() * 198 + 1;
-            } while(isOverlappingLJ(x, y, ps));
-            ps.add(new WeightedParticle(i, x, y, vx, vy, 0, 0, 0,  0.1, 2, 1));
+                x = r.nextDouble() * W + radius;
+                y = r.nextDouble() * L * 0.3 + radius; //30% superior
+                overlapped++;
+            } while(isOverlappingLJ(x, y, radius, ps) && overlapped < 100);
+            if(overlapped < 100)
+                ps.add(new GranularParticle(i, x, y, 0, 0, 0, -9.8, radius,  0.01));
         }
         grid.populate(ps);
         grid.calculateVecins();
@@ -63,23 +66,17 @@ public class SimulatorLennardJones {
         this.generateParticles();
         steps.add(cloneList(ps));
         int step = 1;
-        ArrayList<WeightedParticle> sim = cloneList(ps);
+        ArrayList<GranularParticle> sim = cloneList(ps);
 
         while(true) {
 
             // paredes
             // actualizar las fuerzas
-            sim.parallelStream().forEach(WeightedParticle::calculateTotalForce);
-            sim.parallelStream().forEach(WeightedParticle::calculatePotentialEnergyTotal);
+            sim.parallelStream().forEach(GranularParticle::calculateTotalForce);
             // actualizar posiciones y velocidades
             sim.parallelStream().forEach(this::verletLeapFrogUpdate);
 
             // chequear ratio izq/der
-            long right = sim.parallelStream().filter(p -> p.getX() > 200).count();
-            if(right > n/2){
-                calcPositions();
-                return;
-            }
             // guardar estado y chequear tiempo
             // clonar lista
             sim = cloneList(sim);
@@ -96,13 +93,12 @@ public class SimulatorLennardJones {
             }
             if(step % 1000 == 0){
                 System.out.println(step);
-                System.out.println(right);
             }
             step++;
         }
     }
 
-    private void verletLeapFrogUpdate(WeightedParticle p) {
+    private void verletLeapFrogUpdate(GranularParticle p) {
         double interVX = p.getPrevVx() + deltaTime * p.getAx();
         double interVY = p.getPrevVy() + deltaTime * p.getAy();
         p.setX(p.getX() + deltaTime*interVX);
@@ -114,25 +110,25 @@ public class SimulatorLennardJones {
     }
 
 
-    public ArrayList<WeightedParticle> cloneList(ArrayList<WeightedParticle> ps) {
-        ArrayList<WeightedParticle> l = new ArrayList<>();
-        for (WeightedParticle p : ps) {
+    public ArrayList<GranularParticle> cloneList(ArrayList<GranularParticle> ps) {
+        ArrayList<GranularParticle> l = new ArrayList<>();
+        for (GranularParticle p : ps) {
             l.add(p.clone());
         }
         return l;
     }
 
     public void calcPositions() {
-        try(FileWriter fw = new FileWriter(n + "-test-"+index+".xyz", true);
+        try(FileWriter fw = new FileWriter("starting2-test-"+index+".xyz", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
             NumberFormat f = new DecimalFormat("#0.000");
-            for(ArrayList<WeightedParticle> a : steps) {
+            for(ArrayList<GranularParticle> a : steps) {
                 out.println(a.size());
                 out.println();
-                for (WeightedParticle p : a) {
+                for (GranularParticle p : a) {
                     out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()) +
-                            " " + f.format(p.getVx()) + " " + f.format(p.getVy()) + " " + f.format(p.getV()));
+                            " " + f.format(p.getRadius()));
                 }
             }
 
@@ -141,8 +137,8 @@ public class SimulatorLennardJones {
         }
     }
 
-    public static boolean isOverlappingLJ(double x, double y, List<WeightedParticle> b) {
-        return b.stream().anyMatch(p -> Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2) <= Math.pow(1 /*rm*/ + p.getRadius(), 2));
+    public static boolean isOverlappingLJ(double x, double y, double radius, List<GranularParticle> b) {
+        return b.stream().anyMatch(p -> Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2) <= Math.pow(radius + p.getRadius(), 2));
     }
 
 }
