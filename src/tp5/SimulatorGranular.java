@@ -32,7 +32,7 @@ public class SimulatorGranular {
     }
 
     public void generateParticles(){
-        grid = new GranularGrid(200, 5);
+        grid = new GranularGrid(L, W);
         ps = new ArrayList<>();
 
         Random a = new Random();
