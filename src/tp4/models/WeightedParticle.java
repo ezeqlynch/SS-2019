@@ -153,7 +153,7 @@ public class WeightedParticle {
 
     public double calculatePotentialEnergy(WeightedParticle p) {
         double dist = getDistance(p);
-        return e * (Math.pow(rm / dist, 12) - 2 * Math.pow(rm / dist, 6)) + e;
+        return e * (Math.pow(rm / dist, 12) - 2 * Math.pow(rm / dist, 6));
     }
 
     public double calculateForce(WeightedParticle p) {
