@@ -69,7 +69,7 @@ public class SimulatorGranular {
     }
 
     public void simulate() {
-        int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/30.0)); // para q 30 farmes => 1 segundo
+        int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/60.0)); // para q 30 farmes => 1 segundo
 //        int saveCounter = 10;
         System.out.println(saveCounter);
         this.generateParticles();
@@ -104,7 +104,7 @@ public class SimulatorGranular {
                 }
                 steps.add(cloneList(sim));
             }
-            if(steps.size() > 300){
+            if(steps.size() > 600){
                 calcPositions();
                 steps.clear();
                 return;
@@ -157,7 +157,7 @@ public class SimulatorGranular {
     }
 
     public void calcPositions() {
-        String name = "tp5-test3-"+index;
+        String name = "tp5-L1,5-W0,4-D0,15-"+index;
         try(FileWriter fw = new FileWriter(name+".xyz", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {

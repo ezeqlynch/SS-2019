@@ -9,7 +9,11 @@ public class GranularMain {
         double deltaTime = 0.00005;
 
         SimulatorGranular slj1 = new SimulatorGranular(deltaTime, 1);
+        SimulatorGranular slj2 = new SimulatorGranular(deltaTime, 2);
+        SimulatorGranular slj3 = new SimulatorGranular(deltaTime, 3);
 
         slj1.simulate();
+        slj2.simulate();
+        slj3.simulate();
     }
 }

@@ -157,8 +157,8 @@ public class GranularParticle {
     public double calculateNormalForce(GranularParticle p, boolean xory) {
         double distance = getDistance(p);
         double eta = (radius + p.getRadius() - distance);
-        double enx = (p.getX() - x) / getDistance(p);
-        double eny = (p.getY() - y) / getDistance(p);
+        double enx = (p.getX() - x) / distance;
+        double eny = (p.getY() - y) / distance;
         double vxDiff = vx - p.getVx();
         double vyDiff = vy - p.getVy();
         double etaDot = vxDiff * enx + vyDiff * eny;
@@ -201,6 +201,33 @@ public class GranularParticle {
             fn = (-KN * eta - GAMMA * etaDot) * eny;
             ay += fn / mass;
             this.pressure += Math.abs(fn);
+        } else { //bordes
+            GranularParticle leftEdge = new GranularParticle(-1, GranularMain.W/2 - GranularMain.D/2,0,0,0,0,0,0,0);
+            GranularParticle rightEdge = new GranularParticle(-1, GranularMain.W/2 + GranularMain.D/2,0,0,0,0,0,0,0);
+            if(radius - getDistance(leftEdge) > 0){
+                double distance = getDistance(leftEdge);
+                double eta = radius - distance;
+                double enx = (leftEdge.getX() - x) / distance;
+                double eny = (leftEdge.getY() - y) / distance;
+                double etaDot = vx * enx + vy * eny;
+                double forcex = (- KN * eta - GAMMA * etaDot) * enx;
+                double forcey = (- KN * eta - GAMMA * etaDot) * eny;
+                this.pressure += Math.abs(forcex) + Math.abs(forcey);
+                ax += forcex / mass;
+                ay += forcey / mass;
+            }
+            if(radius - getDistance(rightEdge) > 0){
+                double distance = getDistance(rightEdge);
+                double eta = radius - distance;
+                double enx = (rightEdge.getX() - x) / distance;
+                double eny = (rightEdge.getY() - y) / distance;
+                double etaDot = vx * enx + vy * eny;
+                double forcex = (- KN * eta - GAMMA * etaDot) * enx;
+                double forcey = (- KN * eta - GAMMA * etaDot) * eny;
+                this.pressure += Math.abs(forcex) + Math.abs(forcey);
+                ax += forcex / mass;
+                ay += forcey / mass;
+            }
         }
         this.pressure = this.pressure/(this.radius*2*Math.PI);
     }
