@@ -22,6 +22,7 @@ public class GranularParticle {
     private double mass;
     private double v;
     private boolean wentDown;
+    private double pressure;
 
     private ArrayList<GranularParticle> vecins;
 
@@ -156,7 +157,9 @@ public class GranularParticle {
         double vxDiff = vx - p.getVx();
         double vyDiff = vy - p.getVy();
         double etaDot = vxDiff * enx + vyDiff * eny;
-        return xory ? (- KN * eta - GAMMA * etaDot) * enx : (- KN * eta - GAMMA * etaDot) * eny;
+        double force = xory ? (- KN * eta - GAMMA * etaDot) * enx : (- KN * eta - GAMMA * etaDot) * eny;
+        this.pressure += Math.abs(force);
+        return force;
         // en = (enx, eny)
         // et = (-eny, enx)
         //http://wnbell.com/media/2005-07-SCA-Granular/BeYiMu2005.pdf
@@ -166,29 +169,35 @@ public class GranularParticle {
     }
 
     public void calculateTotalForce() {
+        this.pressure = 0;
         ax = vecins.parallelStream().mapToDouble(p -> calculateNormalForce(p, true)).sum() / mass;
         ay = vecins.parallelStream().mapToDouble(p -> calculateNormalForce(p, false)).sum() / mass - 9.8;
         //paredes
+        double fn = 0;
         if(x < radius) { //pared izq
              double eta = radius - x;
              double enx = -1; //eny = 0
              double etaDot = vx * enx;
-             double fn = (-KN * eta - GAMMA * etaDot) * enx;
+             fn = (-KN * eta - GAMMA * etaDot) * enx;
              ax += fn / mass;
+             this.pressure += Math.abs(fn);
         } else if(x > 0.3 - radius) { //pared der
             double eta = radius - (0.3 - x);
             double enx = 1; //eny = 0
             double etaDot = vx * enx;
-            double fn = (-KN * eta - GAMMA * etaDot) * enx;
+            fn = (-KN * eta - GAMMA * etaDot) * enx;
             ax += fn / mass;
+            this.pressure += Math.abs(fn);
         }
         if(!wentDown && y < radius && (x < 0.13 || x > 0.17)) { // pared abajo
             double eta = radius - y;
             double eny = -1; //eny = 0
             double etaDot = vy * eny;
-            double fn = (-KN * eta - GAMMA * etaDot) * eny;
+            fn = (-KN * eta - GAMMA * etaDot) * eny;
             ay += fn / mass;
+            this.pressure += Math.abs(fn);
         }
+        this.pressure = this.pressure/(this.radius*2*Math.PI);
     }
 
 
@@ -197,6 +206,7 @@ public class GranularParticle {
         c.setPrevVx(prevVx);
         c.setPrevVy(prevVy);
         c.setWentDown(wentDown);
+        c.setPressure(pressure);
         return c;
     }
 
@@ -236,4 +246,12 @@ public class GranularParticle {
     public void setWentDown(boolean wentDown) {
         this.wentDown = wentDown;
     }
+
+    public void setPressure(double pressure) {
+        this.pressure = pressure;
+    }
+    public double getPressure() {
+        return pressure;
+    }
+
 }

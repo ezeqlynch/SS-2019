@@ -65,8 +65,8 @@ public class SimulatorGranular {
     }
 
     public void simulate() {
-//        int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/30.0)); // para q 30 farmes => 1 segundo
-        int saveCounter = 10;
+        int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/30.0)); // para q 30 farmes => 1 segundo
+//        int saveCounter = 10;
         System.out.println(saveCounter);
         this.generateParticles();
         steps.add(cloneList(ps));
@@ -135,7 +135,7 @@ public class SimulatorGranular {
     }
 
     public void calcPositions() {
-        try(FileWriter fw = new FileWriter("starting28-test-"+index+".xyz", true);
+        try(FileWriter fw = new FileWriter("starting30-test-"+index+".xyz", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
             NumberFormat f = new DecimalFormat("#0.00000");
@@ -144,7 +144,8 @@ public class SimulatorGranular {
                 out.println();
                 for (GranularParticle p : a) {
                     out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()) +
-                            " " + p.getRadius());
+                            " " + p.getRadius() +
+                            " " + p.getPressure());
                 }
             }
 
