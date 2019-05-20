@@ -23,6 +23,7 @@ public class GranularParticle {
     private double v;
     private boolean wentDown;
     private double pressure;
+    private double kineticEnergy;
 
     private ArrayList<GranularParticle> vecins;
 
@@ -38,6 +39,7 @@ public class GranularParticle {
         this.ay = ay;
         this.radius = radius;
         this.mass = mass;
+        this.kineticEnergy = 0.5 * mass * Math.pow(Math.hypot(vx,vy),2);
         this.vecins = new ArrayList<>();
     }
 
@@ -63,6 +65,7 @@ public class GranularParticle {
 
     public void setVx(double vx) {
         this.vx = vx;
+        this.kineticEnergy = 0.5 * mass * Math.pow(Math.hypot(vx,vy),2);
     }
 
     public double getVy() {
@@ -71,6 +74,7 @@ public class GranularParticle {
 
     public void setVy(double vy) {
         this.vy = vy;
+        this.kineticEnergy = 0.5 * mass * Math.pow(Math.hypot(vx,vy),2);
     }
 
     public double getAx() {
@@ -103,6 +107,7 @@ public class GranularParticle {
 
     public void setMass(double mass) {
         this.mass = mass;
+        this.kineticEnergy = 0.5 * mass * Math.pow(Math.hypot(vx,vy),2);
     }
 
     public int getIndex() {
@@ -252,6 +257,9 @@ public class GranularParticle {
     }
     public double getPressure() {
         return pressure;
+    }
+    public double getKineticEnergy() {
+        return kineticEnergy;
     }
 
 }

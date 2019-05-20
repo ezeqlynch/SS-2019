@@ -154,7 +154,20 @@ public class SimulatorGranular {
                     out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()) +
                             " " + p.getRadius() +
                             " " + p.getPressure());
+//                            + " " + p.getKineticEnergy());
                 }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try(FileWriter fw = new FileWriter("starting8-test-"+index+".stats", true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw)) {
+            NumberFormat f = new DecimalFormat("#0.00000");
+            out.println(steps.get(0).size());
+            for(ArrayList<GranularParticle> a : steps) {
+                out.println(a.parallelStream().mapToDouble(GranularParticle::getKineticEnergy).average().getAsDouble());
             }
 
         } catch (IOException e) {
