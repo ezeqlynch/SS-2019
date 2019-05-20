@@ -22,6 +22,7 @@ public class SimulatorGranular {
     private ArrayList<GranularParticle> ps;
     private ArrayList<GranularParticle> sim;
     private ArrayList<ArrayList<GranularParticle>> steps;
+    private ArrayList<Double> timedown;
     private int index = 0;
 
 
@@ -31,6 +32,7 @@ public class SimulatorGranular {
         this.W = GranularMain.W;
         this.deltaTime = deltaTime;
         this.steps = new ArrayList<>();
+        this.timedown = new ArrayList<>();
         this.index = index;
     }
 
@@ -81,7 +83,8 @@ public class SimulatorGranular {
             // actualizar las fuerzas
             sim.parallelStream().forEach(GranularParticle::calculateTotalForce);
             // actualizar posiciones y velocidades
-            sim.parallelStream().forEach(this::verletLeapFrogUpdate);
+            final int stepAux = step;
+            sim.parallelStream().forEach(p -> verletLeapFrogUpdate(p, stepAux));
 
             // chequear ratio izq/der
             // guardar estado y chequear tiempo
@@ -90,10 +93,18 @@ public class SimulatorGranular {
             // calcular vecinos (a lo mejor se puede calcular cada x pasos)
             grid.populate(sim);
             grid.calculateVecins();
+
+
+
             if(step % saveCounter == 0) {
+                double egy = sim.parallelStream().mapToDouble(GranularParticle::getKineticEnergy).average().getAsDouble();
+                if(egy < 1e-7){
+                    calcPositions();
+                    return;
+                }
                 steps.add(cloneList(sim));
             }
-            if(steps.size() > 1000){
+            if(steps.size() > 300){
                 calcPositions();
                 steps.clear();
                 return;
@@ -105,7 +116,7 @@ public class SimulatorGranular {
         }
     }
 
-    private void verletLeapFrogUpdate(GranularParticle p) {
+    private void verletLeapFrogUpdate(GranularParticle p, int step) {
         double interVX = p.getPrevVx() + deltaTime * p.getAx();
         double interVY = p.getPrevVy() + deltaTime * p.getAy();
         p.setX(p.getX() + deltaTime*interVX);
@@ -114,7 +125,10 @@ public class SimulatorGranular {
         p.setVy((p.getPrevVy() + interVY)/2);
         p.setPrevVx(interVX);
         p.setPrevVy(interVY);
-        p.setWentDown(p.getY() < 0);
+        if(!p.isWentDown() && p.getY() < 0){
+            p.setWentDown(p.getY() < 0);
+            timedown.add(step * deltaTime);
+        }
         if(p.getY() < -0.4){
             double x; double y; Random r = new Random();
             do{
@@ -143,7 +157,8 @@ public class SimulatorGranular {
     }
 
     public void calcPositions() {
-        try(FileWriter fw = new FileWriter("starting12-test-"+index+".xyz", true);
+        String name = "tp5-test3-"+index;
+        try(FileWriter fw = new FileWriter(name+".xyz", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
             NumberFormat f = new DecimalFormat("#0.00000");
@@ -161,13 +176,26 @@ public class SimulatorGranular {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try(FileWriter fw = new FileWriter("starting8-test-"+index+".stats", true);
+        try(FileWriter fw = new FileWriter(name+".stats", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
             NumberFormat f = new DecimalFormat("#0.00000");
             out.println(steps.get(0).size());
             for(ArrayList<GranularParticle> a : steps) {
                 out.println(a.parallelStream().mapToDouble(GranularParticle::getKineticEnergy).average().getAsDouble());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try(FileWriter fw = new FileWriter(name+"-times.stats", true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw)) {
+            NumberFormat f = new DecimalFormat("#0.00000");
+            out.println(f.format(timedown.get(0)));
+            for (int i = 1; i < timedown.size(); i++) {
+                out.println(f.format(-timedown.get(i-1) + timedown.get(i)));
             }
 
         } catch (IOException e) {

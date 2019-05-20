@@ -5,3 +5,7 @@ TP4/data/*
 __pycache__/*
 out/*
 SS-2019\.iml
+*.avi
+*.xyz
+*.stats
+*.ovito
