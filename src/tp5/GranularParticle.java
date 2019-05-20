@@ -189,7 +189,7 @@ public class GranularParticle {
             ax += fn / mass;
             this.pressure += Math.abs(fn);
         }
-        if(!wentDown && y < radius && (x < 0.13 || x > 0.17)) { // pared abajo
+        if(!wentDown && y < radius && (x < 0.075 || x > 0.225)) { // pared abajo
             double eta = radius - y;
             double eny = -1; //eny = 0
             double etaDot = vy * eny;
