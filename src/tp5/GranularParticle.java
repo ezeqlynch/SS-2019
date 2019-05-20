@@ -186,15 +186,15 @@ public class GranularParticle {
              fn = (-KN * eta - GAMMA * etaDot) * enx;
              ax += fn / mass;
              this.pressure += Math.abs(fn);
-        } else if(x > 0.3 - radius) { //pared der
-            double eta = radius - (0.3 - x);
+        } else if(x > GranularMain.W - radius) { //pared der
+            double eta = radius - (GranularMain.W - x);
             double enx = 1; //eny = 0
             double etaDot = vx * enx;
             fn = (-KN * eta - GAMMA * etaDot) * enx;
             ax += fn / mass;
             this.pressure += Math.abs(fn);
         }
-        if(!wentDown && y < radius && (x < 0.075 || x > 0.225)) { // pared abajo
+        if(!wentDown && y < radius && (x < GranularMain.W/2 - GranularMain.D/2 || x > GranularMain.W/2 + GranularMain.D/2)) { // pared abajo
             double eta = radius - y;
             double eny = -1; //eny = 0
             double etaDot = vy * eny;

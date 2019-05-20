@@ -25,10 +25,10 @@ public class SimulatorGranular {
     private int index = 0;
 
 
-    public SimulatorGranular(double L, double W, double D, double deltaTime, int index){
-        this.L = L;
-        this.D = D;
-        this.W = W;
+    public SimulatorGranular(double deltaTime, int index){
+        this.L = GranularMain.L;
+        this.D = GranularMain.D;
+        this.W = GranularMain.W;
         this.deltaTime = deltaTime;
         this.steps = new ArrayList<>();
         this.index = index;
@@ -47,7 +47,7 @@ public class SimulatorGranular {
             overlapped = 0;
             do{
                 x = r.nextDouble() * (W - 2 * radius) + radius;
-                y = r.nextDouble() * (L  - 2 * radius) * 0.9 + (0.1 - radius); //30% superior
+                y = r.nextDouble() * (L  - 2 * radius) * 0.9 + (L * 0.1 - radius); //90% superior
                 overlapped++;
             } while(isOverlappingLJ(x, y, radius, ps) && overlapped < 1000);
             if(overlapped < 1000)
@@ -93,12 +93,12 @@ public class SimulatorGranular {
             if(step % saveCounter == 0) {
                 steps.add(cloneList(sim));
             }
-            if(steps.size() > 10000){
+            if(steps.size() > 1000){
                 calcPositions();
                 steps.clear();
                 return;
             }
-            if(step % 1000 == 0){
+            if(step % 10000 == 0){
                 System.out.println(step);
             }
             step++;
@@ -119,7 +119,7 @@ public class SimulatorGranular {
             double x; double y; Random r = new Random();
             do{
                 x = r.nextDouble() * (W - 2 * p.getRadius()) + p.getRadius();
-                y = r.nextDouble() * (L  - 2 * p.getRadius()) * 0.25 + 0.75; //75% superior
+                y = r.nextDouble() * (L  - 2 * p.getRadius()) * 0.4 + L * 0.6; //75% superior
             } while(isOverlappingLJ(x, y, p.getRadius(), sim));
             p.setX(x);
             p.setY(y);
@@ -143,7 +143,7 @@ public class SimulatorGranular {
     }
 
     public void calcPositions() {
-        try(FileWriter fw = new FileWriter("starting8-test-"+index+".xyz", true);
+        try(FileWriter fw = new FileWriter("starting12-test-"+index+".xyz", true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw)) {
             NumberFormat f = new DecimalFormat("#0.00000");
