@@ -7,8 +7,8 @@ import java.util.ArrayList;
 public class GranularParticle {
 
 
-    private static final double KN = 100000;
-    private static final double GAMMA = 70;
+    private static final double KN = 1e5;
+    private static final double GAMMA = 400;
     private int index;
     private double x;
     private double y;
@@ -201,7 +201,7 @@ public class GranularParticle {
             fn = (-KN * eta - GAMMA * etaDot) * eny;
             ay += fn / mass;
             this.pressure += Math.abs(fn);
-        } else { //bordes
+        } else if(!wentDown && y < radius){ //bordes
             GranularParticle leftEdge = new GranularParticle(-1, GranularMain.W/2 - GranularMain.D/2,0,0,0,0,0,0,0);
             GranularParticle rightEdge = new GranularParticle(-1, GranularMain.W/2 + GranularMain.D/2,0,0,0,0,0,0,0);
             if(radius - getDistance(leftEdge) > 0){

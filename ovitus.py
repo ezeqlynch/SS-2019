@@ -20,24 +20,26 @@ def project_point(xyz, painter, args):
 # This user-defined function is called by OVITO to let it draw arbitrary graphics on top of the viewport.
 # It is passed a QPainter (see http://qt-project.org/doc/qt-5/qpainter.html).
 def render(painter, **args):
-
+	width = 0.4
+	height = 1.5
+	rendij = 0.2
 	node = ovito.dataset.selected_node
 	positions = node.compute().particle_properties.position.array
 	
 	#abajo izq
 	xy1 = project_point([0, 0, 0], painter, args) 
 	#arriba izq
-	xy2 = project_point([0, 1, 0], painter, args)
+	xy2 = project_point([0, height, 0], painter, args)
 	#abajo der
-	xy3 = project_point([0.3, 0, 0], painter, args)
+	xy3 = project_point([width, 0, 0], painter, args)
 	#abajo izq
-	xy4 = project_point([0.3, 1, 0], painter, args)
+	xy4 = project_point([width, height, 0], painter, args)
 	
 	#abajo1
-	xy5 = project_point([0.075, 0, 0], painter, args)
+	xy5 = project_point([width/2 - rendij/2, 0, 0], painter, args)
 	
 	#abajo2
-	xy6 = project_point([0.225, 0, 0], painter, args)
+	xy6 = project_point([width/2 + rendij/2, 0, 0], painter, args)
 	
 	# This demo code prints the current animation frame into the upper left corner of the viewport.
 	
