@@ -17,8 +17,15 @@ def argumentParser():
       description='This program shows data from .\n', formatter_class=RawTextHelpFormatter)
 
   parser.add_argument(
-      '--staticFile',
-      help="Path to the static data file.",
+      '--staticFiles',
+      help="Path to the static data files.",
+      nargs='+',
+      default='data/cut.xyz'
+  )
+  parser.add_argument(
+      '--d',
+      help="d of static data files.",
+      nargs='+',
       default='data/cut.xyz'
   )
 
@@ -28,24 +35,23 @@ def argumentParser():
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
-    staticFile = open(parsedArgs.staticFile, "r")
-
-    n = int(staticFile.readline().split(' ')[0])
-    deltaTime = 1/60
-    totalKE = []
-
-    for line in staticFile:
-        arr = line.split(' ')
-        if(len(arr) == 1):
-            if(arr[0] == '\n'):
-                continue
-            totalKE.append(float(arr[0]))
-
-    times = list(map(lambda num: num*deltaTime,
-                     list(range(len(totalKE)))))
-
-
-    plt.plot(times, totalKE, marker=".", markersize=3, linewidth=0.5, label="KE")
+    files = parsedArgs.staticFiles
+    ds = parsedArgs.d
+    
+    for index, fileName in enumerate(files, start=0):
+        staticFile = open(fileName, "r")
+        n = int(staticFile.readline().split(' ')[0])
+        deltaTime = 1/60
+        totalKE = []
+        for line in staticFile:
+            arr = line.split(' ')
+            if(len(arr) == 1):
+                if(arr[0] == '\n'):
+                    continue
+                totalKE.append(float(arr[0]))
+        times = list(map(lambda num: num*deltaTime,
+                        list(range(len(totalKE)))))
+        plt.plot(times, totalKE, marker=".", markersize=3, linewidth=0.5, label="KE d=" + ds[index])
     plt.title('Energía cinética total sobre tiempo')
 
     # plt.axis([0, 5, -1, 1])
@@ -66,4 +72,4 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     # plt.show()
-    plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
+    plt.savefig('multi.png', bbox_inches='tight')

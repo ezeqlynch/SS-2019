@@ -17,7 +17,7 @@ def argumentParser():
       description='This program shows data from .\n', formatter_class=RawTextHelpFormatter)
 
   parser.add_argument(
-      '--staticFile',
+      '--g',
       help="Path to the static data file.",
       default='data/cut.xyz'
   )
@@ -28,24 +28,27 @@ def argumentParser():
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
-    staticFile = open(parsedArgs.staticFile, "r")
+    g = parsedArgs.g
+    # staticFile = open(parsedArgs.staticFile, "r")
+    for i in range(1,4):
+        staticFile = open("./data/tp5-L1,5-W0,4-D0,0-KN10e5-G"+g+"-"+str(i)+".stats", "r")
 
-    n = int(staticFile.readline().split(' ')[0])
-    deltaTime = 1/60
-    totalKE = []
+        n = int(staticFile.readline().split(' ')[0])
+        deltaTime = 1/60
+        totalKE = []
 
-    for line in staticFile:
-        arr = line.split(' ')
-        if(len(arr) == 1):
-            if(arr[0] == '\n'):
-                continue
-            totalKE.append(float(arr[0]))
+        for line in staticFile:
+            arr = line.split(' ')
+            if(len(arr) == 1):
+                if(arr[0] == '\n'):
+                    continue
+                totalKE.append(float(arr[0]))
 
-    times = list(map(lambda num: num*deltaTime,
-                     list(range(len(totalKE)))))
+        times = list(map(lambda num: num*deltaTime,
+                        list(range(len(totalKE)))))
 
 
-    plt.plot(times, totalKE, marker=".", markersize=3, linewidth=0.5, label="KE")
+        plt.plot(times, totalKE, marker=".", markersize=3, linewidth=0.5, label="KE")
     plt.title('Energía cinética total sobre tiempo')
 
     # plt.axis([0, 5, -1, 1])
@@ -65,5 +68,5 @@ if __name__ == "__main__":
     # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
     plt.tight_layout()
 
-    # plt.show()
-    plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
+    plt.show()
+    # plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
