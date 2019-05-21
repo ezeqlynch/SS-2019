@@ -38,7 +38,7 @@ if __name__ == "__main__":
         times = []
         for i in range(1,4):
             staticFile = open(
-                "./data/tp5-L1,5-W0,4-D0,0-KN10e5-G"+g+"-"+str(i)+".stats", "r")
+                "./data/cerrado/tp5-L1,5-W0,4-D0,0-KN10e5-G"+g+"-"+str(i)+".stats", "r")
             n = int(staticFile.readline().split(' ')[0])
             deltaTime = 1/60
             steps = 0
@@ -47,14 +47,15 @@ if __name__ == "__main__":
                 if(len(arr) == 1):
                     if(arr[0] == '\n'):
                         continue
-                    else:
-                        steps = steps+1
+                    if(float(arr[0]) < 10e-6 and float(arr[0]) != 0 ):
+                        break
+                    steps = steps+1
             times.append(steps*deltaTime)
         totalTimes.append(times)
     for i in range(len(totalTimes)):
         avgTime.append(np.mean(totalTimes[i]))
         avgTimeErr.append(np.std(totalTimes[i]))
-    plt.errorbar([40,50,60,70,80,90,100,200,300], avgTime, avgTimeErr, marker="o", markersize=5,
+    plt.errorbar([10,35,70,100,200], avgTime, avgTimeErr, marker="o", markersize=5,
                  linewidth=2, linestyle='None')
         # plt.plot(times, avgKE, marker=".", markersize=3,
         #          linewidth=0.5, label="Promedio KE d=0," + d, yerr=avgKEerr)
@@ -67,7 +68,7 @@ if __name__ == "__main__":
     # plt.legend(loc='best')
     # plt.yscale("log")
     # plt.ylim(ymin=10**-3, ymax=10**-1)
-    plt.ylim(ymin=0.4, ymax=1.2)
+    # plt.ylim(ymin=0.4, ymax=1.2)
     # plt.xlim(xmin=0)
 
     plt.grid(b=True, which='major', linestyle='-')

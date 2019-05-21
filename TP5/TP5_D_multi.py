@@ -33,7 +33,7 @@ if __name__ == "__main__":
               '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#000075', '#808080', '#ffffff', '#000000']
     for index, g in enumerate(parsedArgs.g):
         for i in range(1,4):
-            staticFile = open("./data/tp5-L1,5-W0,4-D0,0-KN10e5-G"+g+"-"+str(i)+".stats", "r")
+            staticFile = open("./data/cerrado/tp5-L1,5-W0,4-D0,0-KN10e5-G"+g+"-"+str(i)+".stats", "r")
 
             n = int(staticFile.readline().split(' ')[0])
             deltaTime = 1/60
