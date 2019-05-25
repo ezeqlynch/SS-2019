@@ -88,12 +88,13 @@ if __name__ == "__main__":
         # plt.plot(timesAvg, linewidth=0.5, color=colors[i], label=labels[i])
         # plt.plot(timesAvg2, linewidth=0.5, color=colors[i])
         # plt.plot(timesAvg3, linewidth=0.5, color=colors[i])
-        plt.title('Caudal')
+        plt.title('Aproximación por Beverloo')
     print(means)
-    print(stds)
+    print()
     reg = np.polyfit(dsnum, means, 1)
-    x = np.linspace(0.15, 0.25, 100)
-    y = reg[0] * x + reg[1]
+    ds = np.arange(0.15, 0.25, 0.0001)
+
+    plt.plot(ds, [5150 * math.pow(math.fabs(x-(-1.244)*0.0125), 1.5) for x in ds], 'r-', label='y = B * (x - (-1.244 * 0.0125)')
     plt.errorbar(dsnum, means, stds, marker=".", markersize=5,
                  linewidth=1, linestyle='None', barsabove=True, ecolor="green", color="blue")
     # plt.errorbar(x, y, color="red", label="y="+ format(reg[0], '.2f') +" * x " + format(reg[1], '.2f'))
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     plt.ylabel('Partículas/segundo')
     plt.xlabel('Tamaño de ranura (m)')
     # plt.yscale("log")
-    # plt.legend(loc='best')
+    plt.legend(loc='best')
     plt.ylim(ymin=0)
 
     plt.grid(b=True, which='major', linestyle='-', axis='y')
