@@ -31,28 +31,32 @@ if __name__ == "__main__":
     parsedArgs = argumentParser().parse_args()
     colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#008080',
               '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#000075', '#808080', '#ffffff', '#000000']
-    for index, g in enumerate(parsedArgs.g):
-        for i in range(1,4):
-            staticFile = open("./data/cerrado/tp5-L1,5-W0,4-D0,0-KN10e5-G"+g+"-"+str(i)+".stats", "r")
+    gs = ["10.0", "35.0", "70.0", "100.0", "200.0", "400.0"]
+    for j in range(0, 6):
+        for i in range(1, 4):
+            staticFile = open("../tp5-KN10e5-G"+gs[j]+" "+str(i)+".stats", "r")
 
             n = int(staticFile.readline().split(' ')[0])
             deltaTime = 1/60
             totalKE = []
-
+            counter = 0
             for line in staticFile:
                 arr = line.split(' ')
                 if(len(arr) == 1):
                     if(arr[0] == '\n'):
                         continue
-                    totalKE.append(float(arr[0]))
+                    if counter == 5:
+                        counter = 0
+                        totalKE.append(float(arr[0]))
+                    counter += 1
 
-            times = list(map(lambda num: num*deltaTime,
-                            list(range(len(totalKE)))))
+            times = list(map(lambda num: num*deltaTime*5,
+                             list(range(len(totalKE)))))
 
             if(i == 1):
-                plt.plot(times, totalKE, marker=".", markersize=5, linewidth=0.5, label="g="+g, color=colors[index])
+                plt.plot(times, totalKE, marker=".", markersize=5, linewidth=0.5, label="g="+gs[j], color=colors[j])
             else:
-                plt.plot(times, totalKE, marker=".", markersize=5, linewidth=0.5, color=colors[index])
+                plt.plot(times, totalKE, marker=".", markersize=5, linewidth=0.5, color=colors[j])
 
     plt.title('Energía cinética total sobre tiempo')
 

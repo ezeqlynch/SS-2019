@@ -39,9 +39,9 @@ if __name__ == "__main__":
     colors = ["blue", "red", "green", "pink", "purple"]
     labels = ["d = 0.150m", "d = 0.175m", "d = 0.200m", "d = 0.225m", "d = 0.250m"]
     for i in range(0, 5):
-        staticFile = open("../tp5sims/1/tp5-L1,5-W0,4-D0,"+str(files[i])+"-1-times.stats", "r")
-        staticFile2 = open("../tp5sims/1/tp5-L1,5-W0,4-D0,"+str(files[i])+"-2-times.stats", "r")
-        staticFile3 = open("../tp5sims/1/tp5-L1,5-W0,4-D0,"+str(files[i])+"-3-times.stats", "r")
+        staticFile = open("../0."+str(files[i])+"-1-times.stats", "r")
+        staticFile2 = open("../0."+str(files[i])+"-2-times.stats", "r")
+        staticFile3 = open("../0."+str(files[i])+"-3-times.stats", "r")
 
         times = []
         times2 = []
@@ -52,23 +52,21 @@ if __name__ == "__main__":
         fullAvg = []
         fullAvgErr = []
         for line in staticFile:
-            times.append(float(line))
-
+            times.append(float(line.replace(",",".")))
         timesAvg = running_mean(times, 1000)
         timesAvg = timesAvg**-1
 
         for line in staticFile2:
-            times2.append(float(line))
+            times2.append(float(line.replace(",",".")))
 
         timesAvg2 = running_mean(times2, 1000)
         timesAvg2 = timesAvg2 ** -1
 
         for line in staticFile3:
-            times3.append(float(line))
+            times3.append(float(line.replace(",",".")))
 
         timesAvg3 = running_mean(times3, 1000)
         timesAvg3 = timesAvg3 ** -1
-        print(min(len(timesAvg), len(timesAvg2), len(timesAvg3)))
         for j in range(0, min(len(timesAvg), len(timesAvg2), len(timesAvg3))):
             fullAvg.append(np.mean([timesAvg[j], timesAvg2[j], timesAvg3[j]]))
             fullAvgErr.append(np.std([timesAvg[j], timesAvg2[j], timesAvg3[j]]))
@@ -79,7 +77,7 @@ if __name__ == "__main__":
         aux = np.concatenate((timesAvg[spliceFrom[i]:], timesAvg2[spliceFrom[i]:], timesAvg3[spliceFrom[i]:]), axis=None)
         means.append(np.mean(aux))
         stds.append(np.std(aux))
-
+        plt.title("Aproximacion por Beverloo")
         #for errors ->
         # plt.errorbar(range(0,min(len(timesAvg), len(timesAvg2), len(timesAvg3))), fullAvg, fullAvgErr, marker=".", markersize=1,
         #              linewidth=0.01, label=labels[i])
@@ -88,20 +86,23 @@ if __name__ == "__main__":
         # plt.plot(timesAvg, linewidth=0.5, color=colors[i], label=labels[i])
         # plt.plot(timesAvg2, linewidth=0.5, color=colors[i])
         # plt.plot(timesAvg3, linewidth=0.5, color=colors[i])
-        plt.title('Aproximación por Beverloo')
+        # plt.title('Media de Medias moviles del caudal')
     print(means)
-    print()
+    print(stds)
+    # print()
     reg = np.polyfit(dsnum, means, 1)
     ds = np.arange(0.15, 0.25, 0.0001)
-
-    plt.plot(ds, [5150 * math.pow(math.fabs(x-(-1.244)*0.0125), 1.5) for x in ds], 'r-', label='y = B * (x - (-1.244 * 0.0125)')
+    #
+    plt.plot(ds, [5634 * math.pow(math.fabs(x-(0)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - 0 * 0.0125)')
+    plt.plot(ds, [5634 * math.pow(math.fabs(x-(-0.688)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - (-0.688 * 0.0125)', color = "pink")
     plt.errorbar(dsnum, means, stds, marker=".", markersize=5,
                  linewidth=1, linestyle='None', barsabove=True, ecolor="green", color="blue")
     # plt.errorbar(x, y, color="red", label="y="+ format(reg[0], '.2f') +" * x " + format(reg[1], '.2f'))
     plt.xticks(dsnum)
     # plt.axis([0, 5, -1, 1])
-    plt.ylabel('Partículas/segundo')
-    plt.xlabel('Tamaño de ranura (m)')
+    plt.ylabel('Caudal (Particulas/segundo)')
+    plt.xlabel('Tamano de ranura (m)')
+    # plt.xlabel('N de particulas que cayeron')
     # plt.yscale("log")
     plt.legend(loc='best')
     plt.ylim(ymin=0)

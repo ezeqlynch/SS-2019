@@ -34,11 +34,14 @@ if __name__ == "__main__":
     avgTime = []
     avgTimeErr = []
     totalTimes = []
-    for index, g in enumerate(parsedArgs.g):
+    averageTimes2 = [[7.24, 7.91], [4.16, 5.5], [2.42, 2.76, 6.1], [3.6, 4.52, 5.08], [4.4, 4.4, 4.74]]
+    gstr = ["10.0","35.0","70.0","100.0","200.0","400.0"]
+    #tiempos: 10: -,-,-, 35: 7.24, 7.91, - 70: 4,16, 5.5, - 100: 2.42, 2.76, 6.1 200: 3.6, 4.52, 5.08 500: 4.4, 4,4. 4,74
+    for index in range(1, len(gstr)):
         times = []
         for i in range(1,4):
             staticFile = open(
-                "./data/cerrado/tp5-L1,5-W0,4-D0,0-KN10e5-G"+g+"-"+str(i)+".stats", "r")
+                "../tp5-KN10e5-G"+gstr[i]+"-"+str(i)+".stats", "r")
             n = int(staticFile.readline().split(' ')[0])
             deltaTime = 1/60
             steps = 0
@@ -52,10 +55,12 @@ if __name__ == "__main__":
                     steps = steps+1
             times.append(steps*deltaTime)
         totalTimes.append(times)
-    for i in range(len(totalTimes)):
-        avgTime.append(np.mean(totalTimes[i]))
-        avgTimeErr.append(np.std(totalTimes[i]))
-    plt.errorbar([10,35,70,100,200], avgTime, avgTimeErr, marker="o", markersize=5,
+    for i in range(len(averageTimes2)):
+        avgTime.append(np.mean(averageTimes2[i]))
+        avgTimeErr.append(np.std(averageTimes2[i]))
+    print (avgTime)
+    print (avgTimeErr)
+    plt.errorbar([35,70,100,200, 400], avgTime, avgTimeErr, marker="o", markersize=5,
                  linewidth=2, linestyle='None')
         # plt.plot(times, avgKE, marker=".", markersize=3,
         #          linewidth=0.5, label="Promedio KE d=0," + d, yerr=avgKEerr)
