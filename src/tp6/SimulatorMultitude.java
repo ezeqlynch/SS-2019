@@ -56,9 +56,9 @@ public class SimulatorMultitude {
         while(true) {
 
             // actualizar posiciones y velocidades
+            sim.parallelStream().forEach(MultitudeParticle::checkWall);
             sim.parallelStream().forEach(MultitudeParticle::calculateTarget);
             sim.parallelStream().forEach(this::updootPartiquel);
-
             // guardar estado y chequear tiempo
             // clonar lista
             sim = cloneList(sim);
@@ -91,12 +91,17 @@ public class SimulatorMultitude {
             p.setVx(vd * ex);
             p.setVy(vd * ey);
         }
-        //check walls aca?
-        
+        if(p.getX() > 20) {
+            double vd = MultitudeParticle.V_MAX * (p.getRadius() - MultitudeParticle.R_MIN) / (MultitudeParticle.R_MAX - MultitudeParticle.R_MIN);
+            p.setVx(vd);
+        }
         double r = p.getRadius() + MultitudeParticle.R_MAX/(tau/deltaTime);
         p.setRadius(r > MultitudeParticle.R_MAX ? MultitudeParticle.R_MAX : r);
         p.setX(p.getX() + vx * deltaTime);
         p.setY(p.getY() + vy * deltaTime);
+        if(p.getX() > 20) {
+            p.setOut(true);
+        }
     }
 
     public ArrayList<MultitudeParticle> cloneList(ArrayList<MultitudeParticle> ps) {

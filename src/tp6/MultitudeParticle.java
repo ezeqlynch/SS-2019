@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class MultitudeParticle {
 
-    public static double R_MIN = 0.12;
-    public static double R_MAX = 0.35;
+    public static double R_MIN = 0.15;
+    public static double R_MAX = 0.32;
     public static double V_MAX = 1.55;
 
     private int index;
@@ -17,7 +17,7 @@ public class MultitudeParticle {
     private double vy;
     private double radius;
     private double v;
-
+    public boolean out;
     public Target target;
 
     private ArrayList<MultitudeParticle> vecins;
@@ -32,6 +32,7 @@ public class MultitudeParticle {
         this.vy = vy;
         this.radius = radius;
         this.vecins = new ArrayList<>();
+        this.out = false;
     }
 
     public double getX() {
@@ -96,7 +97,7 @@ public class MultitudeParticle {
 
     public void addVecins(ArrayList<MultitudeParticle> vecins, double Rc) {
         for(MultitudeParticle p: vecins){
-            if (p != null && getDistance(p) - 2 * radius < Rc) {
+            if (p != null && getDistance(p) - 2 * radius < Rc && x < 20) {
                 p.addVecin(this);
                 this.vecins.add(p);
             }
@@ -114,7 +115,33 @@ public class MultitudeParticle {
         p.setRadius(R_MIN);
         p.setVx(ve * ex * -1);
         p.setVy(ve * ey * -1);
+    }
 
+    public boolean isOverlapping(double x, double y){
+        return Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2) <= Math.pow(radius, 2);
+    }
+
+    public void checkWall(){ //hacer aujero
+        double ve = V_MAX;
+        if(x > 20 - radius && (y < 9.4 || y > 10.6) && x < 20) { //20 harcodeado = pos de la pared // chequear las puntas
+            radius = R_MIN;
+            vx = ve * -1;
+            vy = 0;
+        } else if(x > 20 - radius && y > 9.4 && x < 20 && isOverlapping(20, 9.4)) {
+            double dist = Math.sqrt(Math.pow(x - 20, 2) + Math.pow(y - 9.4,2));
+            double ex = (x - 20)/dist; //a - b va de b a a y necesito q vaya de p a mi => de p a mi mi - p
+            double ey = (y - 9.4)/dist;
+            radius = R_MIN;
+            vx = ve * ex;
+            vy = ve * ey;
+        } else if(x > 20 - radius && y < 10.6 && x < 20 && isOverlapping(20, 10.6)) {
+            double dist = Math.sqrt(Math.pow(x - 20, 2) + Math.pow(y - 9.4,2));
+            double ex = (x - 20)/dist; //a - b va de b a a y necesito q vaya de p a mi => de p a mi mi - p
+            double ey = (y - 10.6)/dist;
+            radius = R_MIN;
+            vx = ve * ex;
+            vy = ve * ey;
+        }
     }
 
     public void addSelfVecins(ArrayList<MultitudeParticle> vecins, double Rc) {
@@ -130,7 +157,11 @@ public class MultitudeParticle {
     }
 
     public void calculateTarget(){
-        target = new Target(10, 10);
+        if((x > 19 && y > 9.4 && y < 10.6) || x > 20){
+            target = new Target(30, y);
+        } else {
+            target = new Target(20, 10);
+        }
         //calcula el punto mas cercano de la salida
     }
 
@@ -141,7 +172,16 @@ public class MultitudeParticle {
     public MultitudeParticle clone() {
         MultitudeParticle c = new MultitudeParticle(index, x, y, vx, vy, radius);
         c.setV(v);
+        c.setOut(out);
         return c;
+    }
+
+    public void setOut(boolean out) {
+        this.out = out;
+    }
+
+    public boolean isOut() {
+        return out;
     }
 
     @Override
