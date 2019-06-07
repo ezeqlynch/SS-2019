@@ -8,6 +8,7 @@ public class MultitudeParticle {
 
     public static double R_MIN = 0.12;
     public static double R_MAX = 0.35;
+    public static double V_MAX = 1.55;
 
     private int index;
     private double x;
@@ -104,6 +105,16 @@ public class MultitudeParticle {
 
     public void addVecin(MultitudeParticle p) {
         this.vecins.add(p);
+        double ve = V_MAX;
+        double ex = (x - p.getX())/this.getDistance(p); //a - b va de b a a y necesito q vaya de p a mi => de p a mi mi - p
+        double ey = (y - p.getY())/this.getDistance(p);
+        radius = R_MIN;
+        vx = ve * ex;
+        vy = ve * ey;
+        p.setRadius(R_MIN);
+        p.setVx(ve * ex * -1);
+        p.setVy(ve * ey * -1);
+
     }
 
     public void addSelfVecins(ArrayList<MultitudeParticle> vecins, double Rc) {
@@ -119,7 +130,12 @@ public class MultitudeParticle {
     }
 
     public void calculateTarget(){
+        target = new Target(10, 10);
         //calcula el punto mas cercano de la salida
+    }
+
+    public double distToTarget(){
+        return Math.sqrt(Math.pow(target.x - x, 2) + Math.pow(target.y - y, 2));
     }
 
     public MultitudeParticle clone() {
@@ -141,7 +157,7 @@ public class MultitudeParticle {
     }
 
     public double getV() {
-        return v;
+        return Math.sqrt(vx * vx + vy * vy);
     }
 
     public void setV(double v) {

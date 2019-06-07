@@ -15,7 +15,7 @@ public class MultitudeGrid {
     public MultitudeGrid(double L) {
         this.L = L;
         this.Rc = 0;
-        this.M = 80;
+        this.M = 10;
         this.grid = new ArrayList[M][M];
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[0].length; j++) {

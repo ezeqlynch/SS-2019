@@ -18,6 +18,7 @@ public class SimulatorMultitude {
     private MultitudeGrid grid;
     private ArrayList<MultitudeParticle> ps;
     private ArrayList<ArrayList<MultitudeParticle>> steps;
+    private double tau = 0.4; //tiempo de rellegado al max r
     private int index = 0;
 
     public SimulatorMultitude(int n, double deltaTime, int index){
@@ -30,17 +31,14 @@ public class SimulatorMultitude {
     public void generateParticles(){
         grid = new MultitudeGrid(L);
         ps = new ArrayList<>();
-
         Random r = new Random();
         for (int i = 0; i < n; i++) {
-            double vx = 0;
-            double vy = 0;
             double x, y;
             do{
                 x = r.nextDouble() * (L - 2*MultitudeParticle.R_MIN) + MultitudeParticle.R_MIN;
                 y = r.nextDouble() * (L - 2*MultitudeParticle.R_MIN) + MultitudeParticle.R_MIN;
             } while(isOverlappingM(x, y, MultitudeParticle.R_MIN, ps));
-            ps.add(new MultitudeParticle(i, x, y, vx, vy, 0));
+            ps.add(new MultitudeParticle(i, x, y, 0, 0, MultitudeParticle.R_MIN));
         }
         grid.populate(ps);
         grid.calculateVecins();
@@ -48,6 +46,7 @@ public class SimulatorMultitude {
 
     public void simulate() {
         int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/30.0)); // para q 30 farmes => 1 segundo
+//        int saveCounter = 1;
         System.out.println(saveCounter);
         this.generateParticles();
         steps.add(cloneList(ps));
@@ -57,8 +56,8 @@ public class SimulatorMultitude {
         while(true) {
 
             // actualizar posiciones y velocidades
-            sim.parallelStream().forEach(this::updootPartiquel);
             sim.parallelStream().forEach(MultitudeParticle::calculateTarget);
+            sim.parallelStream().forEach(this::updootPartiquel);
 
             // guardar estado y chequear tiempo
             // clonar lista
@@ -83,6 +82,21 @@ public class SimulatorMultitude {
 
     private void updootPartiquel(MultitudeParticle p){
         //calcula velocidades bassado en sus vecinos o su radio y dsp calcula las nuevas posiciones
+        double vx = p.getVx();
+        double vy = p.getVy();
+        if(p.getRadius() < MultitudeParticle.R_MAX && p.getRadius() != MultitudeParticle.R_MIN){ // si el radio es menor q el max
+            double vd = MultitudeParticle.V_MAX * (p.getRadius() - MultitudeParticle.R_MIN) / (MultitudeParticle.R_MAX - MultitudeParticle.R_MIN);
+            double ex = (p.target.x - p.getX())/p.distToTarget();
+            double ey = (p.target.y - p.getY())/p.distToTarget();
+            p.setVx(vd * ex);
+            p.setVy(vd * ey);
+        }
+        //check walls aca?
+        
+        double r = p.getRadius() + MultitudeParticle.R_MAX/(tau/deltaTime);
+        p.setRadius(r > MultitudeParticle.R_MAX ? MultitudeParticle.R_MAX : r);
+        p.setX(p.getX() + vx * deltaTime);
+        p.setY(p.getY() + vy * deltaTime);
     }
 
     public ArrayList<MultitudeParticle> cloneList(ArrayList<MultitudeParticle> ps) {
@@ -103,7 +117,7 @@ public class SimulatorMultitude {
                 out.println();
                 for (MultitudeParticle p : a) {
                     out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()) +
-                            " " + f.format(p.getVx()) + " " + f.format(p.getVy()) + " " + f.format(p.getV()));
+                            " " + f.format(p.getRadius()));
                 }
             }
 

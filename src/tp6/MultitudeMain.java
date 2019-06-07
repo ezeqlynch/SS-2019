@@ -4,7 +4,7 @@ public class MultitudeMain {
     public static void main(String[] args) {
         double deltaTime = 0.001;
 
-        SimulatorMultitude slj1 = new SimulatorMultitude(1000, deltaTime, 1);
+        SimulatorMultitude slj1 = new SimulatorMultitude(300, deltaTime, 9);
 //        deltaTime += 0.0001;
 //
 //        SimulatorMultitude slj2 = new SimulatorMultitude(1000, deltaTime, 2);
