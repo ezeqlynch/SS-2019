@@ -32,8 +32,6 @@ if __name__ == "__main__":
     parsedArgs = argumentParser().parse_args()
     staticFile = open(parsedArgs.staticFile, "r")
 
-    # n = int(staticFile.readline().split(' ')[0])
-    deltaTime = 1/60
     particlesOut = 0
     time = 0
     x = []
@@ -45,15 +43,10 @@ if __name__ == "__main__":
         if(len(arr) == 1):
             if(arr[0] == '\n'):
                 continue
-            outTime = float(arr[0])
-            flag = True
-            while flag:
-                x.append(time)
-                if(time > outTime):
-                    particlesOut+=1
-                    flag = False
-                y.append(particlesOut)
-                time += deltaTime
+            time += float(arr[0])
+            x.append(time)
+            particlesOut += 1
+            y.append(particlesOut)
 
     plt.plot(x, y, marker=".",
              markersize=3, linewidth=0.5, label="Escaped Particles")
@@ -76,5 +69,5 @@ if __name__ == "__main__":
     # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
     plt.tight_layout()
 
-    # plt.show()
-    plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
+    plt.show()
+    # plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')

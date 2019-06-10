@@ -19,8 +19,15 @@ def argumentParser():
       description='This program shows data from .\n', formatter_class=RawTextHelpFormatter)
 
   parser.add_argument(
-      '--staticFile',
-      help="Path to the static data file.",
+      '--d',
+      help="d of static data files.",
+      nargs='+',
+      default='data/cut.xyz'
+  )
+  parser.add_argument(
+      '--dnames',
+      help="d of static data files.",
+      nargs='+',
       default='data/cut.xyz'
   )
 
@@ -30,24 +37,23 @@ def argumentParser():
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
-    spliceFrom = [200, 300, 500, 700, 1000]
-    files = [15, 175, 2, 225, 25]
-    ds = ["0.15", "0.175", "0.2", "0.225", "0.25"]
-    dsnum = [0.15, 0.175, 0.2, 0.225, 0.25]
+    dnames = parsedArgs.dnames
+    spliceFrom = [60, 90, 150, 210, 300]
+    ds = ["1.55"]
+    dsnum = [1.55]
     means = []
     stds = []
     colors = ["blue", "red", "green", "pink", "purple"]
     labels = ["d = 0.150m", "d = 0.175m", "d = 0.200m", "d = 0.225m", "d = 0.250m"]
-    for i in range(0, 5):
+    for i, d in enumerate(parsedArgs.d):
         times = []
         timesAvgs = []
         # timesAvg2 = []
         # timesAvg3 = []
         fullAvg = []
         fullAvgErr = []
-        for j in range(0, 3):
-            staticFile = open("../0."+str(files[i])+"-1-times.stats", "r")
-
+        for j in range(1, 4):
+            staticFile = open("./data/300-times-v"+ dnames[i] +"-"+ str(j) +".stats", "r")
             for line in staticFile:
                 times.append(float(line.replace(",",".")))
             timesAvg = running_mean(times, 1000)
@@ -80,8 +86,8 @@ if __name__ == "__main__":
     reg = np.polyfit(dsnum, means, 1)
     ds = np.arange(0.15, 0.25, 0.0001)
     #
-    plt.plot(ds, [5634 * math.pow(math.fabs(x-(0)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - 0 * 0.0125)')
-    plt.plot(ds, [5634 * math.pow(math.fabs(x-(-0.688)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - (-0.688 * 0.0125)', color = "pink")
+    # plt.plot(ds, [5634 * math.pow(math.fabs(x-(0)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - 0 * 0.0125)')
+    # plt.plot(ds, [5634 * math.pow(math.fabs(x-(-0.688)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - (-0.688 * 0.0125)', color = "pink")
     plt.errorbar(dsnum, means, stds, marker=".", markersize=5,
                  linewidth=1, linestyle='None', barsabove=True, ecolor="green", color="blue")
     # plt.errorbar(x, y, color="red", label="y="+ format(reg[0], '.2f') +" * x " + format(reg[1], '.2f'))

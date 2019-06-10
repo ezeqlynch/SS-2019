@@ -23,10 +23,9 @@ def argumentParser():
       default='data/cut.xyz'
   )
   parser.add_argument(
-      '--dnames',
-      help="d of static data files.",
-      nargs='+',
-      default='data/cut.xyz'
+      '--simus',
+      help="Path to the static data file.",
+      default=1
   )
 
   return parser
@@ -37,27 +36,25 @@ def argumentParser():
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
-    staticFile = open(parsedArgs.staticFile, "r")
-    dnames = parsedArgs.dnames
+    simusNum = int(parsedArgs.simus)
 
-    deltaTime = 1/60
+    deltaTime = 1/100
     for index, d in enumerate(parsedArgs.d):
         avgOut = []
         avgOutErr = []
         totalOuts = []
-        for i in range(1, 4):
+        for i in range(1, simusNum+1):
             x = []
             y = []
             particlesOut = 0
-            time = 0
-            staticFile = open("./data/tp6-name"+str(i)+".stats", "r")
-            # n = int(staticFile.readline().split(' ')[0])
+            staticFile = open("./data/300-times-v"+ d +"-"+ str(i) +".stats", "r")
             for line in staticFile:
                 arr = line.split(' ')
                 if(len(arr) == 1):
                     if(arr[0] == '\n'):
                         continue
                     outTime = float(arr[0])
+                    time = 0
                     flag = True
                     while flag:
                         if(time > outTime):
@@ -66,11 +63,17 @@ if __name__ == "__main__":
                         y.append(particlesOut)
                         time += deltaTime
             totalOuts.append(y)
+        print(len(totalOuts))
         for i in range(len(totalOuts[0])):
-            avgOut.append(
-                np.mean([totalOuts[0][i], totalOuts[1][i], totalOuts[2][i]]))
-            avgOutErr.append(
-                np.std([totalOuts[0][i], totalOuts[1][i], totalOuts[2][i]]))
+            arr = []
+            for j in range(simusNum):
+                if(i< len(totalOuts[j])):
+                    arr.append(totalOuts[j][i])
+                else:
+                    arr.append(300)
+
+            avgOut.append(np.mean(arr))
+            avgOutErr.append(np.std(arr))
         times = list(map(lambda num: num*deltaTime,
                             list(range(len(avgOut)))))
         plt.errorbar(times, avgOut, avgOutErr, marker=".", markersize=3,
@@ -95,5 +98,5 @@ if __name__ == "__main__":
     # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
     plt.tight_layout()
 
-    # plt.show()
-    plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
+    plt.show()
+    # plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')

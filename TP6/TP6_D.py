@@ -28,6 +28,11 @@ def argumentParser():
       nargs='+',
       default='data/cut.xyz'
   )
+  parser.add_argument(
+      '--simus',
+      help="Path to the static data file.",
+      default=1
+  )
 
   return parser
 
@@ -35,16 +40,18 @@ def argumentParser():
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
-    staticFile = open(parsedArgs.staticFile, "r")
     vnames = parsedArgs.vnames
+    simusNum = int(parsedArgs.simus)
+    print(parsedArgs.d)
+    print(parsedArgs.vnames)
 
     deltaTime = 1/60
     avgEndTimes = []
     avgEndTimesErr = []
     for index, d in enumerate(parsedArgs.d):
         totalEndTimes = []
-        for i in range(1, 4):
-            staticFile = open("./data/tp6-v"+vnames[index]+"-"+str(i)+".stats", "r")
+        for i in range(1, simusNum+1):
+            staticFile = open("./data/300-times-v"+ vnames[index] +"-"+ str(i) +".stats", "r")
             # n = int(staticFile.readline().split(' ')[0])
             endTime = 0
             for line in staticFile:
@@ -52,21 +59,22 @@ if __name__ == "__main__":
                 if(len(arr) == 1):
                     if(arr[0] == '\n'):
                         continue
-                    endTime = float(arr[0])
+                    endTime += float(arr[0])
             totalEndTimes.append(endTime)
-        for i in range(len(totalEndTimes)):
-            avgEndTimes.append(
-                np.mean(totalEndTimes))
-            avgEndTimesErr.append(
-                np.std(totalEndTimes))
-    plt.errorbar(d, avgEndTimes, avgEndTimesErr, marker=".", markersize=3,
+        avgEndTimes.append(
+            np.mean(totalEndTimes))
+        avgEndTimesErr.append(
+            np.std(totalEndTimes))
+    print(len(avgEndTimes))
+    print(len(avgEndTimesErr))
+    plt.errorbar(parsedArgs.d, avgEndTimes, avgEndTimesErr, marker=".", markersize=3,
                     linewidth=0.5, label="Tiempo promedio de salida")
     # plt.plot(times, avgKE, marker=".", markersize=3,
     #             linewidth=0.5, label="Promedio KE d=0," + d, yerr=avgKEErr)
 
     # plt.axis([0, 5, -1, 1])
-    plt.ylabel('Particulas')
-    plt.xlabel('Tiempo (s)')
+    plt.ylabel('Tiempo (s)')
+    plt.xlabel('Velocidad Deseada (m/s)')
     # plt.yscale("log")
     # plt.xscale("log")
     plt.legend(loc='best')
@@ -81,5 +89,5 @@ if __name__ == "__main__":
     # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
     plt.tight_layout()
 
-    # plt.show()
-    plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
+    plt.show()
+    # plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')

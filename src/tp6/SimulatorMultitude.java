@@ -1,5 +1,7 @@
 package tp6;
 
+import com.sun.javafx.binding.StringFormatter;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -139,8 +141,8 @@ public class SimulatorMultitude {
         }
 
         if(timedown.size() > 0){
-
-            try(FileWriter fw = new FileWriter(n+"-times-"+index+".stats", true);
+            NumberFormat vf = new DecimalFormat("#0.000");
+            try(FileWriter fw = new FileWriter("./TP6/data/"+n+"-times-v"+ vf.format(MultitudeParticle.V_MAX )+ "-"+index+".stats", false);
                 BufferedWriter bw = new BufferedWriter(fw);
                 PrintWriter out = new PrintWriter(bw)) {
                 NumberFormat f = new DecimalFormat("#0.00000");
