@@ -39,42 +39,29 @@ if __name__ == "__main__":
     colors = ["blue", "red", "green", "pink", "purple"]
     labels = ["d = 0.150m", "d = 0.175m", "d = 0.200m", "d = 0.225m", "d = 0.250m"]
     for i in range(0, 5):
-        staticFile = open("../0."+str(files[i])+"-1-times.stats", "r")
-        staticFile2 = open("../0."+str(files[i])+"-2-times.stats", "r")
-        staticFile3 = open("../0."+str(files[i])+"-3-times.stats", "r")
-
         times = []
-        times2 = []
-        times3 = []
-        timesAvg = []
-        timesAvg2 = []
-        timesAvg3 = []
+        timesAvgs = []
+        # timesAvg2 = []
+        # timesAvg3 = []
         fullAvg = []
         fullAvgErr = []
-        for line in staticFile:
-            times.append(float(line.replace(",",".")))
-        timesAvg = running_mean(times, 1000)
-        timesAvg = timesAvg**-1
+        for j in range(0, 3):
+            staticFile = open("../0."+str(files[i])+"-1-times.stats", "r")
 
-        for line in staticFile2:
-            times2.append(float(line.replace(",",".")))
-
-        timesAvg2 = running_mean(times2, 1000)
-        timesAvg2 = timesAvg2 ** -1
-
-        for line in staticFile3:
-            times3.append(float(line.replace(",",".")))
-
-        timesAvg3 = running_mean(times3, 1000)
-        timesAvg3 = timesAvg3 ** -1
-        for j in range(0, min(len(timesAvg), len(timesAvg2), len(timesAvg3))):
-            fullAvg.append(np.mean([timesAvg[j], timesAvg2[j], timesAvg3[j]]))
-            fullAvgErr.append(np.std([timesAvg[j], timesAvg2[j], timesAvg3[j]]))
+            for line in staticFile:
+                times.append(float(line.replace(",",".")))
+            timesAvg = running_mean(times, 1000)
+            timesAvg = timesAvg**-1
+            timesAvgs.append(timesAvg)
+            
+        for j in range(0, min(list(map(lambda timesAvg: len(timesAvg), timesAvgs)))):
+            fullAvg.append(np.mean([timesAvgs[0][j], timesAvg[1][j], timesAvg[2][j]]))
+            fullAvgErr.append(np.std([timesAvgs[0][j], timesAvgs[1][j], timesAvgs[2][j]]))
 
 
         #for mean and std single value ->
 
-        aux = np.concatenate((timesAvg[spliceFrom[i]:], timesAvg2[spliceFrom[i]:], timesAvg3[spliceFrom[i]:]), axis=None)
+        aux = np.concatenate((timesAvgs[0][spliceFrom[i]:], timesAvgs[1][spliceFrom[i]:], timesAvgs[2][spliceFrom[i]:]), axis=None)
         means.append(np.mean(aux))
         stds.append(np.std(aux))
         plt.title("Aproximacion por Beverloo")

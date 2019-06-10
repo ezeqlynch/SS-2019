@@ -23,8 +23,8 @@ def argumentParser():
       default='data/cut.xyz'
   )
   parser.add_argument(
-      '--dnames',
-      help="d of static data files.",
+      '--vnames',
+      help="vMax name of static data files.",
       nargs='+',
       default='data/cut.xyz'
   )
@@ -32,49 +32,35 @@ def argumentParser():
   return parser
 
 
-
-
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
     staticFile = open(parsedArgs.staticFile, "r")
-    dnames = parsedArgs.dnames
+    vnames = parsedArgs.vnames
 
     deltaTime = 1/60
+    avgEndTimes = []
+    avgEndTimesErr = []
     for index, d in enumerate(parsedArgs.d):
-        avgOut = []
-        avgOutErr = []
-        totalOuts = []
+        totalEndTimes = []
         for i in range(1, 4):
-            x = []
-            y = []
-            particlesOut = 0
-            time = 0
-            staticFile = open("./data/tp6-name"+str(i)+".stats", "r")
+            staticFile = open("./data/tp6-v"+vnames[index]+"-"+str(i)+".stats", "r")
             # n = int(staticFile.readline().split(' ')[0])
+            endTime = 0
             for line in staticFile:
                 arr = line.split(' ')
                 if(len(arr) == 1):
                     if(arr[0] == '\n'):
                         continue
-                    outTime = float(arr[0])
-                    flag = True
-                    while flag:
-                        if(time > outTime):
-                            particlesOut += 1
-                            flag = False
-                        y.append(particlesOut)
-                        time += deltaTime
-            totalOuts.append(y)
-        for i in range(len(totalOuts[0])):
-            avgOut.append(
-                np.mean([totalOuts[0][i], totalOuts[1][i], totalOuts[2][i]]))
-            avgOutErr.append(
-                np.std([totalOuts[0][i], totalOuts[1][i], totalOuts[2][i]]))
-        times = list(map(lambda num: num*deltaTime,
-                            list(range(len(avgOut)))))
-        plt.errorbar(times, avgOut, avgOutErr, marker=".", markersize=3,
-                        linewidth=0.5, label="Prom. salidas con Vmax=" + d)
+                    endTime = float(arr[0])
+            totalEndTimes.append(endTime)
+        for i in range(len(totalEndTimes)):
+            avgEndTimes.append(
+                np.mean(totalEndTimes))
+            avgEndTimesErr.append(
+                np.std(totalEndTimes))
+    plt.errorbar(d, avgEndTimes, avgEndTimesErr, marker=".", markersize=3,
+                    linewidth=0.5, label="Tiempo promedio de salida")
     # plt.plot(times, avgKE, marker=".", markersize=3,
     #             linewidth=0.5, label="Promedio KE d=0," + d, yerr=avgKEErr)
 
