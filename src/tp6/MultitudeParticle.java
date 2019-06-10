@@ -157,10 +157,10 @@ public class MultitudeParticle {
     }
 
     public void calculateTarget(){
-        if((x > 19 && y > 9.4 && y < 10.6) || x > 20){
+        if((x > 19 && y > 9.6 && y < 10.4) || x > 20){
             target = new Target(30, y);
         } else {
-            target = new Target(20, 10);
+            target = new Target(19.5, 10);
         }
         //calcula el punto mas cercano de la salida
     }

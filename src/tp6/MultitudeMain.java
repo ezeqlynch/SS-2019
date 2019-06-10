@@ -2,9 +2,9 @@ package tp6;
 
 public class MultitudeMain {
     public static void main(String[] args) {
-        double deltaTime = 0.001;
+        double deltaTime = 0.01;
 
-        SimulatorMultitude slj1 = new SimulatorMultitude(300, deltaTime, 24);
+        SimulatorMultitude slj1 = new SimulatorMultitude(300, deltaTime, 29);
 //        deltaTime += 0.0001;
 //
 //        SimulatorMultitude slj2 = new SimulatorMultitude(1000, deltaTime, 2);
