@@ -10,6 +10,9 @@ import math
 
 
 # import PyQt5.QtGui
+def running_mean(x, N):
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+    return (cumsum[N:] - cumsum[:-N]) / float(N)
 
 
 def argumentParser():
@@ -31,15 +34,13 @@ def argumentParser():
   return parser
 
 
-
-
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
     simusNum = int(parsedArgs.simus)
 
-    deltaTime = 1/100
-    for index, d in enumerate(parsedArgs.d[::-1]):
+    deltaTime = 0.2
+    for index, d in enumerate(parsedArgs.d):
         avgOut = []
         avgOutErr = []
         totalOuts = []
@@ -47,7 +48,8 @@ if __name__ == "__main__":
             x = []
             y = []
             particlesOut = 0
-            staticFile = open("./data/300-times-v"+ d +"-"+ str(i) +".stats", "r")
+            staticFile = open("./data/300-times-v" + d +
+                              "-" + str(i) + ".stats", "r")
             for line in staticFile:
                 arr = line.split(' ')
                 if(len(arr) == 1):
@@ -67,26 +69,49 @@ if __name__ == "__main__":
         for i in range(len(totalOuts[0])):
             arr = []
             for j in range(simusNum):
-                if(i< len(totalOuts[j])):
+                if(i < len(totalOuts[j])):
                     arr.append(totalOuts[j][i])
                 else:
                     arr.append(300)
-
             avgOut.append(np.mean(arr))
             avgOutErr.append(np.std(arr))
+        
         times = list(map(lambda num: num*deltaTime,
-                            list(range(len(avgOut)))))
-        plt.errorbar(times, avgOut, avgOutErr, marker=".", markersize=1,
-                        linewidth=0.01, elinewidth=0.001, label="Vmax=" + str(float(d)))
-        # plt.plot(times, avgOut, marker=".", markersize=3, linewidth=0.5)
+                         list(range(len(avgOut)))))
 
+        realY = []
+        print(len(y))
+        halfWindowSize = 50  # Window de 20 segundos
+        for i in range(len(y)):
+            if(i < halfWindowSize):
+                start = 0
+                end = i+halfWindowSize
+            elif(i >= len(y)-halfWindowSize):
+                start = i-halfWindowSize
+                end = len(y)-1
+            else:
+                start = i-halfWindowSize
+                end = i+halfWindowSize
+            realY.append((y[end]-y[start])/20)
+        
+        val = running_mean(realY, 20)
+        print("cosa")
+        print(len(val))
+        print(len(times))
+        plt.plot(times[:-(len(times)-len(val))], val, marker=".",
+                 markersize=3, linewidth=0.5, label="Vmax=" + str(float(d)))
+        # plt.errorbar(times, realY, avgOutErr, marker=".", markersize=3,
+        #              linewidth=0.5, label="Prom. salidas con Vmax=" + d)
+    # plt.plot(times, avgKE, marker=".", markersize=3,
+    #             linewidth=0.5, label="Promedio KE d=0," + d, yerr=avgKEErr)
+    plt.title('Media móvil del caudal')
     # plt.axis([0, 5, -1, 1])
-    plt.ylabel('Egresos (partículas)')
+    plt.ylabel('Caudal (partículas / s)')
     plt.xlabel('Tiempo (s)')
     # plt.yscale("log")
-    # plt.xscale( "log")
+    # plt.xscale("log")
     plt.legend(loc='best')
-    plt.ylim(ymin=0)
+    plt.ylim(ymin=0.4)
     plt.xlim(xmin=0)
 
     plt.grid(b=True, which='major', linestyle='-')
@@ -98,4 +123,4 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     plt.show()
-    # plt.savefig("./data/300-times-v"+ d +"-prom.stats" + '.png', bbox_inches='tight')
+    # plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')

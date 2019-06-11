@@ -17,9 +17,14 @@ def argumentParser():
       description='This program shows data from .\n', formatter_class=RawTextHelpFormatter)
 
   parser.add_argument(
-      '--staticFile',
+      '--d',
       help="Path to the static data file.",
-      default='data/cut.xyz'
+      default='1.500'
+  )
+  parser.add_argument(
+      '--simus',
+      help="Path to the static data file.",
+      default=1
   )
 
   return parser
@@ -30,30 +35,32 @@ def argumentParser():
 if __name__ == "__main__":
     # get parser
     parsedArgs = argumentParser().parse_args()
-    staticFile = open(parsedArgs.staticFile, "r")
+    simusNum = int(parsedArgs.simus)
 
-    particlesOut = 0
-    time = 0
-    x = []
-    y = []
-    # staticFile.readline()
+    for i in range(1,simusNum+1):
+        staticFile = open("./data/300-times-v" + parsedArgs.d + "-" + str(i) + ".stats", "r")
+        particlesOut = 0
+        time = 0
+        x = []
+        y = []
+        # staticFile.readline()
+        
+        for line in staticFile:
+            arr = line.split(' ')
+            if(len(arr) == 1):
+                if(arr[0] == '\n'):
+                    continue
+                time += float(arr[0])
+                x.append(time)
+                particlesOut += 1
+                y.append(particlesOut)
 
-    for line in staticFile:
-        arr = line.split(' ')
-        if(len(arr) == 1):
-            if(arr[0] == '\n'):
-                continue
-            time += float(arr[0])
-            x.append(time)
-            particlesOut += 1
-            y.append(particlesOut)
-
-    plt.plot(x, y, marker=".",
-             markersize=3, linewidth=0.5, label="Escaped Particles")
-    plt.title('Particulas salvadas sobre tiempo')
+        plt.plot(x, y, marker=".",
+                markersize=3, linewidth=0.5)
+    # plt.title('Partículas salvadas sobre tiempo')
 
     # plt.axis([0, 5, -1, 1])
-    plt.ylabel('Particulas')
+    plt.ylabel('Egresos (particulas)')
     plt.xlabel('Tiempo (s)')
     # plt.yscale("log")
     # plt.xscale("log")
@@ -69,5 +76,5 @@ if __name__ == "__main__":
     # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
     plt.tight_layout()
 
-    plt.show()
-    # plt.savefig(parsedArgs.staticFile + '.png', bbox_inches='tight')
+    # plt.show()
+    plt.savefig("./data/300-times-v" + parsedArgs.d + ".stats" + '.png', bbox_inches='tight')
