@@ -22,6 +22,7 @@ def argumentParser():
       nargs='+',
       default='data/cut.xyz'
   )
+
   parser.add_argument(
       '--names',
       help="static data files.",
@@ -53,12 +54,13 @@ if __name__ == "__main__":
     parsedArgs = argumentParser().parse_args()
     deltaTime = float(parsedArgs.delta)
     staticFiles = parsedArgs.staticFiles
+
     for fileIndex, staticFileName in enumerate(staticFiles, start=0):
+
         staticFile = open(staticFileName, "r")
         # outputFile = open("%s_ovito.xyz" % (parsedArgs.staticFile[:-4]), "w")
-        
-        particles = dict()
 
+        particles = dict()
 
         #PARSE PARTICLES
         particleNum = int(staticFile.readline())
@@ -70,10 +72,10 @@ if __name__ == "__main__":
                                                         rawParticle[4], rawParticle[5],
                                                         rawParticle[3])
         staticFile.readline()
-
         collisionTimes = []
         collisionOnDeltaTime = dict()
 
+        
         #PARSE COLLISIONS
         collisionNum = int(staticFile.readline())
         currentTime = 0
@@ -83,36 +85,51 @@ if __name__ == "__main__":
             if(nt == ""):
                 break
             staticFile.readline()
-            nextTime = float(nt)
-            timeTaken = nextTime-currentTime
-            currentTime = nextTime
-            collisionTimes.append(timeTaken)
-            histogramDiv = math.floor(timeTaken/deltaTime)
-            if histogramDiv not in collisionOnDeltaTime:
-                collisionOnDeltaTime[histogramDiv] = 0
-            collisionOnDeltaTime[histogramDiv] = collisionOnDeltaTime[histogramDiv] + 1
+            # nextTime = float(nt)
+            # timeTaken = nextTime-currentTime
+            # currentTime = nextTime
+            # collisionTimes.append(timeTaken)
+            collisionTimes.append(float(nt))
             staticFile.readline()
             staticFile.readline()
             staticFile.readline()
             staticFile.readline()
         staticFile.close()
+
+        deltaTime = 1/60
+        currentTime = 0
+        currentCollision = 0
+        currentTimeCollitions = 0
+        x = []
+        y = []
+        flag = True
+        while(currentCollision < collisionNum-1):
+            if(collisionTimes[currentCollision] < currentTime):
+                currentTimeCollitions += 1
+                currentCollision +=1
+            else:
+                y.append(currentTimeCollitions)
+                x.append(currentTime)
+                currentTime += deltaTime
+                # currentTimeCollitions = 0
         
-        if(parsedArgs.density):
-            plt.title('Probabilidad de colisión / tiempo')
-            plt.ylabel('Probabilidad')
-            plt.xlabel('Tiempo (s)')
-            weights = np.ones_like(collisionTimes)/float(len(collisionTimes))
-            y, x, _ = plt.hist(collisionTimes, bins=30, weights=weights,  edgecolor='black', linewidth=0.5, label="Vi < "+parsedArgs.names[fileIndex] + "m/s")
-        else:
-            plt.title('Cantidad de Colisiones / tiempo')
-            plt.ylabel('Cantidad')
-            plt.xlabel('Tiempo (s)')
-            plt.hist(collisionTimes, bins=30)
-    # plt.xticks(yAxis, xAxis)
+        # y = list(map(lambda num: num*deltaTime,
+        #                  list(range(len(totalKE)))))
+        if(fileIndex == 0):
+            print("Pendiente 0.05: " + str(y[400]/x[400]))
+        if(fileIndex == 1):
+            print("Pendiente 0.1: " + str(y[200]/x[200]))
+        if(fileIndex == 2):
+            print("Pendiente 0.25: " + str(y[50]/x[50]))
+        
+        plt.plot(x, y, marker=".",
+                 markersize=1, linewidth=0.5,  label="Vi<"+parsedArgs.names[fileIndex] + "m/s")    # plt.xticks(yAxis, xAxis)
+    plt.title('Cantidad de colisiones sobre tiempo')
+    plt.ylabel('Cantidad')
+    plt.xlabel('Tiempo (s)')
     plt.grid(b=True, which='major', linestyle='-')
     plt.grid(b=True, which='minor', color="gray", linestyle='--')
-    plt.ylim(ymin=0)
-    plt.xlim(xmin=0, xmax=0.05)  # 50->0.8 100->0.3 250->0.05
+    # plt.ylim(ymin=0)
     # plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(5))
 
     # black_patch = mpatches.Patch(color='black', label='Promedio')
@@ -124,6 +141,9 @@ if __name__ == "__main__":
     #     handles=[title, black_patch, pink_patch, blue_patch], loc=0)
     plt.tight_layout()
     plt.legend(loc='best')
+    # plt.axes().yaxis.set_major_locator(ticker.MultipleLocator(0.25))
+    plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(10000))
+    plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(50))
     # if(parsedArgs.density):
     #     plt.savefig(parsedArgs.staticFile + 'collitionsTime'+ parsedArgs.name +'.png', bbox_inches='tight')
     # else:
