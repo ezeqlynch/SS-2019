@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class GranularParticle {
 
 
-    private static final double KN = 1e5;
+    private static final double KN = 1e3;
     private int index;
     private double x;
     private double y;
@@ -170,12 +170,12 @@ public class GranularParticle {
 
     //deberia quedar igual?
     public void addVecins(ArrayList<GranularParticle> vecins, double Rc) {
-        for(GranularParticle p: vecins){
+        vecins.forEach(p -> {
             if (p != null && getDistance(p) - (radius + p.getRadius()) < Rc) {
                 p.addVecin(this);
                 this.vecins.add(p);
             }
-        }
+        });
     }
 
     public void addVecin(GranularParticle p) {
@@ -183,12 +183,11 @@ public class GranularParticle {
     }
 
     public void addSelfVecins(ArrayList<GranularParticle> vecins, double Rc) {
-        for(GranularParticle p: vecins){
+        vecins.forEach(p -> {
             if(p != null && p != this && getDistance(p) - (radius + p.getRadius()) < Rc) {
-
                 addVecin(p);
             }
-        }
+        });
     }
 
     public ArrayList<GranularParticle> getVecins() {
@@ -196,8 +195,13 @@ public class GranularParticle {
     }
 
 
-
-    public double calculateNormalForce(GranularParticle p, int axis) {
+    // en = (enx, eny)
+    // et = (-eny, enx)
+    //http://wnbell.com/media/2005-07-SCA-Granular/BeYiMu2005.pdf
+    // N = x2 - x1 / ||x2 - x1|| = en versor
+    // V = v1 - v2 (vectores)
+    // Erara(puntito) = V . enx
+    public void calculateNormalForce(GranularParticle p) {
         double distance = getDistance(p);
         double eta = (radius + p.getRadius() - distance);
         double enx = (p.getX() - x) / distance;
@@ -207,34 +211,19 @@ public class GranularParticle {
         double vyDiff = vy - p.getVy();
         double vzDiff = vz - p.getVz();
         double etaDot = vxDiff * enx + vyDiff * eny + vzDiff * enz;
-        double force = 0;
-        switch (axis){
-            case 0: //x
-                force = (- KN * eta - GranularMain.GAMMA * etaDot) * enx;
-                break;
-            case 1: //y
-                force = (- KN * eta - GranularMain.GAMMA * etaDot) * eny;
-                break;
-            case 2: //z
-                force = (- KN * eta - GranularMain.GAMMA * etaDot) * enz;
-                break;
-        }
-        this.pressure += Math.abs(force);
-        return force;
-        // en = (enx, eny)
-        // et = (-eny, enx)
-        //http://wnbell.com/media/2005-07-SCA-Granular/BeYiMu2005.pdf
-        // N = x2 - x1 / ||x2 - x1|| = en versor
-        // V = v1 - v2 (vectores)
-        // Erara(puntito) = V . enx
+        double aux = (- KN * eta - GranularMain.GAMMA * etaDot) / this.mass;
+        this.pressure += Math.abs(aux * this.mass * (Math.abs(enx) + Math.abs(eny) + Math.abs(enz)));
+        this.ax += (aux * enx);
+        this.ay += (aux * eny);
+        this.az += (aux * enz);
     }
 
     public void calculateTotalForce() {
         this.pressure = 0;
-        ax = vecins.parallelStream().mapToDouble(p -> calculateNormalForce(p, 0)).sum() / mass;
-        ay = vecins.parallelStream().mapToDouble(p -> calculateNormalForce(p, 1)).sum() / mass;
-        az = vecins.parallelStream().mapToDouble(p -> calculateNormalForce(p, 2)).sum() / mass - 9.8;
-        //paredes TODO: REHACER
+        this.ax = 0;
+        this.ay = 0;
+        this.az = -9.8;
+        vecins.parallelStream().forEach(this::calculateNormalForce);
         double fn = 0;
         if(x < radius) { //paredes x
              double eta = radius - x;
@@ -267,41 +256,54 @@ public class GranularParticle {
             this.pressure += Math.abs(fn);
         }
         //TODO: hacer ranura
-        if(!wentDown && z < radius /*&& (x < GranularMain.W/2 - GranularMain.D/2 || x > GranularMain.W/2 + GranularMain.D/2)*/) { // pared abajo
+        //pared de abajo
+        if(z < radius /*&& (x < GranularMain.W/2 - GranularMain.D/2 || x > GranularMain.W/2 + GranularMain.D/2)*/) { // pared abajo
             double eta = radius - z;
             double enz = -1; //eny = 0
             double etaDot = vz * enz;
             fn = (-KN * eta - GranularMain.GAMMA * etaDot) * enz;
             az += fn / mass;
             this.pressure += Math.abs(fn);
-        } /*else if(!wentDown && y < radius){ //bordes
-            GranularParticle leftEdge = new GranularParticle(-1, GranularMain.W/2 - GranularMain.D/2,0,0,0,0,0,0,0,0,0,0);
-            GranularParticle rightEdge = new GranularParticle(-1, GranularMain.W/2 + GranularMain.D/2,0,0,0,0,0,0,0,0,0,0);
-            if(radius - getDistance(leftEdge) > 0){
-                double distance = getDistance(leftEdge);
-                double eta = radius - distance;
-                double enx = (leftEdge.getX() - x) / distance;
-                double eny = (leftEdge.getY() - y) / distance;
-                double etaDot = vx * enx + vy * eny;
-                double forcex = (- KN * eta - GranularMain.GAMMA * etaDot) * enx;
-                double forcey = (- KN * eta - GranularMain.GAMMA * etaDot) * eny;
-                this.pressure += Math.abs(forcex) + Math.abs(forcey);
-                ax += forcex / mass;
-                ay += forcey / mass;
+        }
+
+//        TENGO 4 PLANOS
+//        el que pasa por (0,0,1)       (0,0.4,1)   ((L-D)/2,(L-D)/2, 0.75) viendo de x es la izq
+//        el que pasa por (0.4,0,1)     (0,0,1)     ((L-D)/2,(L-D)/2, 0.75) viendo de x es la cercana
+//        el que pasa por (0,0.4,1)     (0.4,0.4,1) ((L+D)/2,(L+D)/2, 0.75) viendo de x es la lejana
+//        el que pasa por (0.4,0.4,1)   (0.4,0,1)   ((L+D)/2,(L+D)/2, 0.75) viendo de x es la der
+
+        if(z < 1.0 && z > 0.75) { //cheq izq
+            double [] distAndPoint = distAndPointToPlane(GranularMain.wall1);
+            if(distAndPoint[3] < this.radius) { // dentro de la parte izquierda
+                GranularParticle closestPoint = new GranularParticle(-1, distAndPoint[0], distAndPoint[1], distAndPoint[2], 0,0,0,0,0,0,0,0);
+                calculateNormalForce(closestPoint);
             }
-            if(radius - getDistance(rightEdge) > 0){
-                double distance = getDistance(rightEdge);
-                double eta = radius - distance;
-                double enx = (rightEdge.getX() - x) / distance;
-                double eny = (rightEdge.getY() - y) / distance;
-                double etaDot = vx * enx + vy * eny;
-                double forcex = (- KN * eta - GranularMain.GAMMA * etaDot) * enx;
-                double forcey = (- KN * eta - GranularMain.GAMMA * etaDot) * eny;
-                this.pressure += Math.abs(forcex) + Math.abs(forcey);
-                ax += forcex / mass;
-                ay += forcey / mass;
+        }
+
+        if(z < 1.0 && z > 0.75) { //cheq cercana
+            double [] distAndPoint = distAndPointToPlane(GranularMain.wall2);
+            if(distAndPoint[3] < this.radius) { // dentro de la parte izquierda
+                GranularParticle closestPoint = new GranularParticle(-1, distAndPoint[0], distAndPoint[1], distAndPoint[2], 0,0,0,0,0,0,0,0);
+                calculateNormalForce(closestPoint);
             }
-        }*/
+        }
+
+        if(z < 1.0 && z > 0.75) { //cheq lejana
+            double [] distAndPoint = distAndPointToPlane(GranularMain.wall3);
+            if(distAndPoint[3] < this.radius) { // dentro de la parte izquierda
+                GranularParticle closestPoint = new GranularParticle(-1, distAndPoint[0], distAndPoint[1], distAndPoint[2], 0,0,0,0,0,0,0,0);
+                calculateNormalForce(closestPoint);
+            }
+        }
+
+        if(z < 1.0 && z > 0.75) { //cheq der
+            double [] distAndPoint = distAndPointToPlane(GranularMain.wall4);
+            if(distAndPoint[3] < this.radius) { // dentro de la parte izquierda
+                GranularParticle closestPoint = new GranularParticle(-1, distAndPoint[0], distAndPoint[1], distAndPoint[2], 0,0,0,0,0,0,0,0);
+                calculateNormalForce(closestPoint);
+            }
+        }
+
         this.pressure = this.pressure/(this.radius*2*Math.PI);
     }
 
@@ -370,5 +372,16 @@ public class GranularParticle {
     public double getKineticEnergy() {
         return kineticEnergy;
     }
+
+    public double[] distAndPointToPlane(double[] plane){
+        double pot2 = plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2];
+        double k = (plane[0] * this.x + plane[1] * this.y + plane[2] * this.z - plane[3]) / pot2;
+        double x = this.x - k * plane[0];
+        double y = this.y - k * plane[1];
+        double z = this.z - k * plane[2];
+        double dist = Math.abs((plane[0] * this.x + plane[1] * this.y + plane[2] * this.z - plane[3])) / Math.sqrt(pot2);
+        return new double[]{x, y, z, dist};
+    }
+
 
 }

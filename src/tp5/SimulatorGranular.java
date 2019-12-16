@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static tp5.GranularMain.wall1;
+
 public class SimulatorGranular {
 
 
@@ -26,6 +28,7 @@ public class SimulatorGranular {
     private ArrayList<ArrayList<GranularParticle>> steps;
     private ArrayList<Double> timedown;
     private int index = 0;
+
 
 
     public SimulatorGranular(double deltaTime, int index){
@@ -53,13 +56,13 @@ public class SimulatorGranular {
             do{
                 x = r.nextDouble() * (W - 2 * radius) + radius;
                 y = r.nextDouble() * (L  - 2 * radius) + radius;
-                z = r.nextDouble() * (H  - 2 * radius) + radius;
+                z = r.nextDouble() * ((H  - 2 * radius) + radius) * 0.4 + 1.1;
                 overlapped++;
             } while(isOverlappingLJ(x, y, z, radius, ps) && overlapped < 1000);
             if(overlapped < 1000)
                 ps.add(new GranularParticle(i, x, y, z,0,0, 0, 0, 0, -9.8, radius,  0.01));
-            if(ps.size() > 1000)
-                break;
+//            if(ps.size() > 1000)
+//                break;
         }
 //        ps.add(new GranularParticle(1, 0.1, 0.2, 0, 0, 0, -9.8, 0.011,  0.01));
 //        ps.add(new GranularParticle(2, 0.12, 0.1, 0, 0, 0, -9.8, 0.012,  0.01));
@@ -79,6 +82,7 @@ public class SimulatorGranular {
         int saveCounter = (int) Math.max(1.0, Math.floor((1.0/deltaTime)/60.0)); // para q 30 farmes => 1 segundo
 //        int saveCounter = 10;
         System.out.println(saveCounter);
+        this.calculateWalls();
         this.generateParticles();
         steps.add(cloneList(ps));
         int step = 1;
@@ -88,20 +92,33 @@ public class SimulatorGranular {
 
             // paredes
             // actualizar las fuerzas
+//            long t1 = System.nanoTime();
             sim.parallelStream().forEach(GranularParticle::calculateTotalForce);
             // actualizar posiciones y velocidades
             final int stepAux = step;
+//            long t2 = System.nanoTime();
+//            System.out.println(step);
+//            System.out.println("time calc force: " + (t2-t1));
             sim.parallelStream().forEach(p -> verletLeapFrogUpdate(p, stepAux));
 
             // chequear ratio izq/der
             // guardar estado y chequear tiempo
             // clonar lista
+//            long t3 = System.nanoTime();
+//            System.out.println("time calc verlet: " + (t3-t2));
+
             sim = cloneList(sim);
+//            long t4 = System.nanoTime();
+//            System.out.println("time calc clone: " + (t4-t3));
             // calcular vecinos (a lo mejor se puede calcular cada x pasos)
             grid.populate(sim);
+//            long t5 = System.nanoTime();
+//            System.out.println("time calc populate: " + (t5-t4));
             grid.calculateVecins();
+//            long t6 = System.nanoTime();
+//            System.out.println("time calc vecins: " + (t6-t5));
 
-
+//            System.out.println("time tot: " + (t6 - t1) + "\n\n\n");
 
             if(step % saveCounter == 0) {
 //                double egy = sim.parallelStream().mapToDouble(GranularParticle::getKineticEnergy).average().getAsDouble();
@@ -110,10 +127,10 @@ public class SimulatorGranular {
 ////                    return;
 ////                }
                 steps.add(cloneList(sim));
-                if(steps.size() % 60 == 0)
+                if(steps.size() % 10 == 0)
                     System.out.println(steps.size());
             }
-            if(steps.size() > 600){
+            if(steps.size() > 100){
                 calcPositions();
                 return;
             }
@@ -134,30 +151,9 @@ public class SimulatorGranular {
         p.setPrevVx(interVX);
         p.setPrevVy(interVY);
         p.setPrevVz(interVZ);
-        if(!p.isWentDown() && p.getZ() < 0){
-            p.setWentDown(p.getZ() < 0);
+        if(!p.isWentDown() && p.getZ() < 0.75){
+            p.setWentDown(p.getZ() < 0.75);
             timedown.add(step * deltaTime);
-        }
-        if(p.getZ() < -0.4){
-            double x; double y; double z; Random r = new Random();
-            do{
-                x = r.nextDouble() * (W - 2 * p.getRadius()) + p.getRadius();
-                y = r.nextDouble() * (L  - 2 * p.getRadius()) + p.getRadius(); //75% superior
-                z = r.nextDouble() * (H  - 2 * p.getRadius()) * 0.4 + H * 0.6; //75% superior
-            } while(isOverlappingLJ(x, y, z, p.getRadius(), sim));
-            p.setX(x);
-            p.setY(y);
-            p.setZ(z);
-            p.setPrevVx(0);
-            p.setPrevVy(0);
-            p.setPrevVz(0);
-            p.setVx(0);
-            p.setVy(0);
-            p.setVz(0);
-            p.setAx(0);
-            p.setAy(0);
-            p.setAz(0);
-            p.setWentDown(false);
         }
     }
 
@@ -201,6 +197,7 @@ public class SimulatorGranular {
             out.println(steps.get(0).size());
             for(ArrayList<GranularParticle> a : steps) {
                 out.println(a.parallelStream().mapToDouble(GranularParticle::getKineticEnergy).average().getAsDouble());
+                out.println(a.parallelStream().mapToDouble(p -> p.getPressure() > 1000 ? p.getPressure() : 0).sum());
             }
 
         } catch (IOException e) {
@@ -225,6 +222,38 @@ public class SimulatorGranular {
 
     public static boolean isOverlappingLJ(double x, double y, double z, double radius, List<GranularParticle> b) {
         return b.stream().anyMatch(p -> Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2) + Math.pow(z - p.getZ(), 2) <= Math.pow(radius + p.getRadius(), 2));
+    }
+
+
+    public void calculateWalls(){
+//        TENGO 4 PLANOS
+//        el que pasa por (0.0,0.0,1.0)   (0.0,0.4,1.0)   ((L-D)/2,(L-D)/2, 0.75)
+//        el que pasa por (0.4,0.0,1.0)   (0.0,0.0,1.0)   ((L-D)/2,(L-D)/2, 0.75)
+//        el que pasa por (0.0,0.4,1.0)   (0.4,0.4,1.0)   ((L+D)/2,(L+D)/2, 0.75)
+//        el que pasa por (0.4,0.4,1.0)   (0.4,0.0,1.0)   ((L+D)/2,(L+D)/2, 0.75)
+        float L = (float) GranularMain.L;
+        float D = (float) GranularMain.D;
+        GranularMain.wall1 = equationPlane(0.0f,0.0f,1.0f,0.0f,0.4f,1.0f, (L-D)/2.0f, (L-D)/2.0f, 0.75f);
+        GranularMain.wall2 = equationPlane(0.4f,0.0f,1.0f,0.0f,0.0f,1.0f, (L-D)/2.0f, (L-D)/2.0f, 0.75f);
+        GranularMain.wall3 = equationPlane(0.0f,0.4f,1.0f,0.4f,0.4f,1.0f, (L+D)/2.0f, (L+D)/2.0f, 0.75f);
+        GranularMain.wall4 = equationPlane(0.4f,0.4f,1.0f,0.4f,0.0f,1.0f, (L+D)/2.0f, (L+D)/2.0f, 0.75f);
+
+    }
+
+    // code from:
+    // https://www.geeksforgeeks.org/program-to-find-equation-of-a-plane-passing-through-3-points/
+    public double[] equationPlane(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3) {
+        float a1 = x2 - x1;
+        float b1 = y2 - y1;
+        float c1 = z2 - z1;
+        float a2 = x3 - x1;
+        float b2 = y3 - y1;
+        float c2 = z3 - z1;
+        float a = b1 * c2 - b2 * c1;
+        float b = a2 * c1 - a1 * c2;
+        float c = a1 * b2 - b1 * a2;
+        float d = (- a * x1 - b * y1 - c * z1);
+        return new double[]{a,b,c,-d};
     }
 
 }
