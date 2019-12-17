@@ -49,7 +49,7 @@ public class SimulatorGranular {
         Random a = new Random();
         Random r = new Random();
         double overlapped = 0;
-        for (int i = 0; overlapped < 1000; i++) {
+        for (int i = 0; overlapped < 100000; i++) {
             double radius = (0.01 * a.nextDouble() + 0.02) / 2;
             double x, y, z;
             overlapped = 0;
@@ -58,10 +58,10 @@ public class SimulatorGranular {
                 y = r.nextDouble() * (L  - 2 * radius) + radius;
                 z = r.nextDouble() * ((H  - 2 * radius) + radius) * 0.4 + 1.1;
                 overlapped++;
-            } while(isOverlappingLJ(x, y, z, radius, ps) && overlapped < 1000);
-            if(overlapped < 1000)
+            } while(isOverlappingLJ(x, y, z, radius, ps) && overlapped < 100000);
+            if(overlapped < 100000)
                 ps.add(new GranularParticle(i, x, y, z,0,0, 0, 0, 0, -9.8, radius,  0.01));
-//            if(ps.size() > 1000)
+//            if(ps.size() > 3000)
 //                break;
         }
 //        ps.add(new GranularParticle(1, 0.1, 0.2, 0, 0, 0, -9.8, 0.011,  0.01));
@@ -130,7 +130,7 @@ public class SimulatorGranular {
                 if(steps.size() % 10 == 0)
                     System.out.println(steps.size());
             }
-            if(steps.size() > 100){
+            if(steps.size() > 600){
                 calcPositions();
                 return;
             }
@@ -181,8 +181,8 @@ public class SimulatorGranular {
                 out.println();
                 for (GranularParticle p : a) {
                     out.println(p.getIndex() + " " + f.format(p.getX() > 999 ? 999 : p.getX()) + " " + f.format(p.getY()> 999? 999:p.getY()) + " " + f.format(p.getZ()> 999? 999:p.getZ()) +
-                            " " + p.getRadius() +
-                            " " + 125.0);
+                            " " + p.getRadius()
+                            );
 //                            + " " + p.getKineticEnergy());
                 }
             }
@@ -197,7 +197,7 @@ public class SimulatorGranular {
             out.println(steps.get(0).size());
             for(ArrayList<GranularParticle> a : steps) {
                 out.println(a.parallelStream().mapToDouble(GranularParticle::getKineticEnergy).average().getAsDouble());
-                out.println(a.parallelStream().mapToDouble(p -> p.getPressure() > 1000 ? p.getPressure() : 0).sum());
+                out.println(a.parallelStream().mapToDouble(p -> p.getPressure() > 500 ? p.getPressure() : 0).sum());
             }
 
         } catch (IOException e) {

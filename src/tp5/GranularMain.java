@@ -8,15 +8,14 @@ public class GranularMain {
     public static double[] wall2;
     public static double[] wall3;
     public static double[] wall4;
-    public static double D = 0.1;
+    public static double D = 0.125;
     public static double GAMMA = 70;
 
     public static void main(String[] args) {
         double deltaTime = 0.00001;
 
-        SimulatorGranular slj1 = new SimulatorGranular(deltaTime, 1);
+        SimulatorGranular slj1 = new SimulatorGranular(deltaTime, 5);
 
         slj1.simulate();
-
     }
 }
