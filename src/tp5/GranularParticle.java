@@ -8,6 +8,7 @@ public class GranularParticle {
 
 
     private static final double KN = 1e3;
+    private static final double MU = 0.5;
     private int index;
     private double x;
     private double y;
@@ -211,11 +212,34 @@ public class GranularParticle {
         double vyDiff = vy - p.getVy();
         double vzDiff = vz - p.getVz();
         double etaDot = vxDiff * enx + vyDiff * eny + vzDiff * enz;
-        double aux = (- KN * eta - GranularMain.GAMMA * etaDot) / this.mass;
-        this.pressure += Math.abs(aux * this.mass * (Math.abs(enx) + Math.abs(eny) + Math.abs(enz)));
+        // -kn * eta - gamma * etadot = fn
+        double fn = - KN * eta - GranularMain.GAMMA * etaDot;
+        double aux = fn / this.mass;
+//        pressure = fn . en
+        this.pressure += Math.abs(fn * (Math.abs(enx) + Math.abs(eny) + Math.abs(enz)));
         this.ax += (aux * enx);
         this.ay += (aux * eny);
         this.az += (aux * enz);
+        //tan force1
+        double vxTan = vxDiff - etaDot * enx;
+        double vyTan = vyDiff - etaDot * eny;
+        double vzTan = vzDiff - etaDot * enz;
+        double modVt = Math.sqrt(vxTan*vxTan + vyTan*vyTan + vzTan*vzTan);
+        double etx = vxTan / modVt;
+        double ety = vyTan / modVt;
+        double etz = vzTan / modVt;
+        //aux * mass = fn
+        double forceCheck = -Math.min(MU * aux*this.mass, 2 * KN * modVt);
+        double forcex = forceCheck * etx;
+        double forcey = forceCheck * ety;
+        double forcez = forceCheck * etz;
+        this.ax += forcex / this.mass;
+        this.ay += forcey / this.mass;
+        this.az += forcez / this.mass;
+        double ft = Math.sqrt(forcex * forcex + forcey * forcey + forcez * forcez);
+//        pressure = ft * et
+//        dir de la fuerza es igual a la de vdiff
+        this.pressure += Math.abs(ft * (Math.abs(etx)+ Math.abs(ety) + Math.abs(etz)));
     }
 
     public void calculateTotalForce() {
@@ -255,7 +279,7 @@ public class GranularParticle {
             ay += fn / mass;
             this.pressure += Math.abs(fn);
         }
-        //TODO: hacer ranura
+
         //pared de abajo
         if(z < radius /*&& (x < GranularMain.W/2 - GranularMain.D/2 || x > GranularMain.W/2 + GranularMain.D/2)*/) { // pared abajo
             double eta = radius - z;
