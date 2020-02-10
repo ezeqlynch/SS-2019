@@ -39,11 +39,11 @@ if __name__ == "__main__":
     colors = ["blue", "red", "green"]
     labels = ["d = 0.1m", "d = 0.125m", "d = 0.15m"]
     for i in range(len(files)):
-        staticFile = open("./data2/0."+str(files[i])+"-1-times.stats", "r")
-        staticFile2 = open("./data2/0."+str(files[i])+"-2-times.stats", "r")
-        staticFile3 = open("./data2/0."+str(files[i])+"-3-times.stats", "r")
-        staticFile4 = open("./data2/0."+str(files[i])+"-4-times.stats", "r")
-        staticFile5 = open("./data2/0."+str(files[i])+"-5-times.stats", "r")
+        staticFile = open("./hourglass-data/0."+str(files[i])+"-1-times.stats", "r")
+        staticFile2 = open("./hourglass-data/0."+str(files[i])+"-2-times.stats", "r")
+        staticFile3 = open("./hourglass-data/0."+str(files[i])+"-3-times.stats", "r")
+        staticFile4 = open("./hourglass-data/0."+str(files[i])+"-4-times.stats", "r")
+        staticFile5 = open("./hourglass-data/0."+str(files[i])+"-5-times.stats", "r")
 
         times = []
         times2 = []
@@ -102,9 +102,9 @@ if __name__ == "__main__":
         # plt.title("Aproximacion por Beverloo")
 
         #for errors ->
-        plt.title('Media de Medias moviles del caudal')
+        plt.title('Media de Medias móviles del caudal')
         plt.errorbar(range(0, min(len(timesAvg), len(timesAvg2), len(timesAvg3), len(timesAvg4), len(timesAvg5))), fullAvg, fullAvgErr, marker=".", markersize=1,
-                     linewidth=0.01, label=labels[i])
+                     linewidth=0.01, color=colors[i], label=labels[i])
 
         #for all together now ->
         # plt.title('Media movil del caudal')
@@ -115,30 +115,31 @@ if __name__ == "__main__":
     print(stds)
     # print()
     reg = np.polyfit(dsnum, means, 1)
-    ds = np.arange(0.1,0.15, 0.25)
+    ds = np.arange(0,3000, 200)
     #
     # plt.plot(ds, [5634 * math.pow(math.fabs(x-(0)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - 0 * 0.0125)')
     # plt.plot(ds, [5634 * math.pow(math.fabs(x-(-0.688)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - (-0.688 * 0.0125)', color = "pink")
     # plt.errorbar(dsnum, means, stds, marker=".", markersize=5,
     #              linewidth=1, linestyle='None', barsabove=True, ecolor="green", color="blue")
     # plt.errorbar(x, y, color="red", label="y="+ format(reg[0], '.2f') +" * x " + format(reg[1], '.2f'))
-    # plt.xticks(dsnum)
+    # plt.xticks(ds)
     # plt.axis([0, 5, -1, 1])
-    plt.ylabel('Caudal (Particulas/segundo)')
+    plt.ylabel('Caudal (p/s)')
     # plt.xlabel('Tamaño de ranura (m)')
-    plt.xlabel('N de particulas que cayeron')
+    plt.xlabel('Nº de partículas que cayeron')
     # plt.yscale("log")
     plt.legend(loc='best')
     plt.ylim(ymin=0, ymax=1500)
 
     plt.grid(b=True, which='major', linestyle='-', axis='y')
-    # plt.grid(b=True, which='minor', color="gray", linestyle='--')
-    plt.show()
+    plt.grid(b=True, which='minor', color="gray", linestyle='--')
 
-    # plt.axes().yaxis.set_major_locator(ticker.MultipleLocator(0.25))
-    # plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(0.05))
-    # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(0.5))
+    plt.axes().yaxis.set_major_locator(ticker.MultipleLocator(200))
+    plt.axes().yaxis.set_minor_locator(ticker.MultipleLocator(100))
+    # plt.axes().xaxis.set_minor_locator(ticker.MultipleLocator(200))
     # plt.tight_layout()
 
+    plt.show()
+    # plt.savefig('fig2.png', bbox_inches='tight')
     # plt.savefig(parsedArgs.staticFile + 'deltaTime' +
     #             parsedArgs.delta + '.png', bbox_inches='tight')

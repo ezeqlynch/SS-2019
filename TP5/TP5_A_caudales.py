@@ -40,11 +40,11 @@ if __name__ == "__main__":
     colors = ["blue", "red", "green"]
     labels = ["d = 0.1m", "d = 0.125m", "d = 0.15m"]
     for i in range(len(files)):
-        staticFile = open("./data2/0."+str(files[i])+"-1-times.stats", "r")
-        staticFile2 = open("./data2/0."+str(files[i])+"-2-times.stats", "r")
-        staticFile3 = open("./data2/0."+str(files[i])+"-3-times.stats", "r")
-        staticFile4 = open("./data2/0."+str(files[i])+"-4-times.stats", "r")
-        staticFile5 = open("./data2/0."+str(files[i])+"-5-times.stats", "r")
+        staticFile = open("./hourglass-data/0."+str(files[i])+"-1-times.stats", "r")
+        staticFile2 = open("./hourglass-data/0."+str(files[i])+"-2-times.stats", "r")
+        staticFile3 = open("./hourglass-data/0."+str(files[i])+"-3-times.stats", "r")
+        staticFile4 = open("./hourglass-data/0."+str(files[i])+"-4-times.stats", "r")
+        staticFile5 = open("./hourglass-data/0."+str(files[i])+"-5-times.stats", "r")
 
         times = []
         times2 = []
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         #              linewidth=0.01, label=labels[i])
 
         #for all together now ->
-        plt.title('Media movil del caudal')
+        plt.title('Media móvil del caudal')
         plt.plot(timesAvg, linewidth=0.5, color=colors[i], label=labels[i])
         plt.plot(timesAvg2, linewidth=0.5, color=colors[i])
         plt.plot(timesAvg3, linewidth=0.5, color=colors[i])
@@ -125,9 +125,9 @@ if __name__ == "__main__":
     # plt.errorbar(x, y, color="red", label="y="+ format(reg[0], '.2f') +" * x " + format(reg[1], '.2f'))
     # plt.xticks(dsnum)
     # plt.axis([0, 5, -1, 1])
-    plt.ylabel('Caudal (Particulas/segundo)')
+    plt.ylabel('Caudal (p/s)')
     # plt.xlabel('Tamaño de ranura (m)')
-    plt.xlabel('N de particulas que cayeron')
+    plt.xlabel('Nº de partículas que cayeron')
     # plt.yscale("log")
     plt.legend(loc='best')
     plt.ylim(ymin=0, ymax=1500)
@@ -141,5 +141,4 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.show()
 
-    # plt.savefig(parsedArgs.staticFile + 'deltaTime' +
-    #             parsedArgs.delta + '.png', bbox_inches='tight')
+    # plt.savefig('fig1.png', bbox_inches='tight')
