@@ -8,7 +8,7 @@ public class GranularParticle {
 
 
     private static final double KN = 1e3;
-    private static final double MU = 0.5;
+    private static final double MU = 0.1;
     private int index;
     private double x;
     private double y;

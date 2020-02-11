@@ -8,7 +8,7 @@ public class GranularMain {
     public static double[] wall2;
     public static double[] wall3;
     public static double[] wall4;
-    public static double D = 0.125;
+    public static double D = 0.15;
     public static double GAMMA = 70;
 
     public static void main(String[] args) {

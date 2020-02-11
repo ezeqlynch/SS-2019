@@ -61,7 +61,7 @@ public class SimulatorGranular {
             } while(isOverlappingLJ(x, y, z, radius, ps) && overlapped < 100000);
             if(overlapped < 100000)
                 ps.add(new GranularParticle(i, x, y, z,0,0, 0, 0, 0, -9.8, radius,  0.01));
-//            if(ps.size() > 3000)
+//            if(ps.size() > 1000)
 //                break;
         }
 //        ps.add(new GranularParticle(1, 0.1, 0.2, 0, 0, 0, -9.8, 0.011,  0.01));
@@ -90,42 +90,13 @@ public class SimulatorGranular {
 
         while(true) {
 
-            // paredes
-            // actualizar las fuerzas
-//            long t1 = System.nanoTime();
             sim.parallelStream().forEach(GranularParticle::calculateTotalForce);
-            // actualizar posiciones y velocidades
             final int stepAux = step;
-//            long t2 = System.nanoTime();
-//            System.out.println(step);
-//            System.out.println("time calc force: " + (t2-t1));
             sim.parallelStream().forEach(p -> verletLeapFrogUpdate(p, stepAux));
-
-            // chequear ratio izq/der
-            // guardar estado y chequear tiempo
-            // clonar lista
-//            long t3 = System.nanoTime();
-//            System.out.println("time calc verlet: " + (t3-t2));
-
             sim = cloneList(sim);
-//            long t4 = System.nanoTime();
-//            System.out.println("time calc clone: " + (t4-t3));
-            // calcular vecinos (a lo mejor se puede calcular cada x pasos)
             grid.populate(sim);
-//            long t5 = System.nanoTime();
-//            System.out.println("time calc populate: " + (t5-t4));
             grid.calculateVecins();
-//            long t6 = System.nanoTime();
-//            System.out.println("time calc vecins: " + (t6-t5));
-
-//            System.out.println("time tot: " + (t6 - t1) + "\n\n\n");
-
             if(step % saveCounter == 0) {
-//                double egy = sim.parallelStream().mapToDouble(GranularParticle::getKineticEnergy).average().getAsDouble();
-////                if(egy < 1e-6 && steps.size() > 10){ //al principio es 0
-////                    calcPositions();
-////                    return;
-////                }
                 steps.add(cloneList(sim));
                 if(steps.size() % 10 == 0)
                     System.out.println(steps.size());
