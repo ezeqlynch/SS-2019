@@ -115,8 +115,8 @@ if __name__ == "__main__":
     reg = np.polyfit(dsnum, means, 1)
     ds = np.arange(0.1, 0.15, 0.0001)
     #
-    plt.plot(ds, [254877 * math.pow(math.fabs(x-(5.652)*0.0125), 2.5)
-                  for x in ds], 'r-', label='254877 * (x - 5.652*0.0125)^2.5')
+    plt.plot(ds, [254877 * math.pow(math.fabs(x-(4.208)*0.0125), 2.5)
+                  for x in ds], 'r-', label='254877 * (x - 4.208*0.0125)^2.5')
     # plt.plot(ds, [5634 * math.pow(math.fabs(x-(-0.688)*0.0125), 1.5) for x in ds], 'r-', label='y = 5634 * (x - (-0.688 * 0.0125)', color = "pink")
     plt.errorbar(dsnum, means, stds, marker=".", markersize=5,
                  linewidth=1, linestyle='None', barsabove=True, ecolor="green", color="blue")

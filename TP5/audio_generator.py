@@ -49,7 +49,7 @@ if __name__ == "__main__":
     audio = AudioSegment.silent(duration=totalTime*1000, frame_rate=44100)
     for i in range(len(timestamps)):
       if(pressures[i]>1):
-        audio = audio.overlay(marbleSound + (pressures[i]/1000 -10), position=timestamps[i]*1000)
+        audio = audio.overlay(marbleSound + (pressures[i]/1000 -30), position=timestamps[i]*1000)
     audio.export("pressureSound.wav", format="wav")
     # play(audio)
 

@@ -1,0 +1,247 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{textcomp}
+\usepackage[latin1]{inputenc}
+
+\title{Medios granulares: Reloj de arena en 3D}
+\author{Teófilo Duffau (54151), Ezequiel Lynch  (54172)}
+\date{\the\year-\ifnum\month<10\relax0\fi\the\month-\ifnum\day<10\relax0\fi\the\day}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Una simulación de un reloj de arena en 3D utilizando como modelo matemático medios granulares y la aproximación de Verlet.
+\end{abstract}
+\newpage
+\tableofcontents
+
+\newpage
+\section{Introducción}
+El proposito del trabajo investigativo es el de analizar el movimiento de un medio granular 3D en un recipiente con forma de un reloj de arena. Para esto se basa en ena extension dimensional de las ecuaciones dadas por la cátedra de medios granulares para 2 dimensiones.
+
+\section{Fundamentos}
+El trabajo consta de una simulacion del flujo granular gravitatorio en un reloj de arena tal que:
+\begin{itemize}
+  \item El sistema contiene partículas macroscópicas con comportamiento distinto al de sólidos, líquidos o gases.
+  \item El sistema se basa en colisiones de tiempo mucho mayor al tiempo de viaje de las partículas.
+  \item Tiene interacciones altamente disipativas, el sistema llega al reposo si no recibe energía del exterior o propias. 
+\end{itemize}
+
+
+\section{Modelo Matemático}
+
+\subsection{Cálculo de la fuerza}
+Se decidió utilizar la ecuación de la teórica (N.1) siendo \begin{math} \xi \end{math} la superposición entre la partículas, \begin{math}k_n\end{math} el coeficiente de restitución de las partículas y \begin{math}\gamma\end{math} parámetro del tipo de partículas.
+
+La fuerza entre las partículas i y j se calcula de la siguiente forma:
+\begin{equation}
+    \label{Force equation}
+    F_{ij} = \Big[-k_n\xi_{ij} - \gamma \dot{\xi}_{ij}\Big] \hat{n}
+\end{equation}
+
+Siendo el versor normal
+\begin{equation}
+    \hat{n} = ({e^n}_x, {e^n}_y, {e^n}_z)
+\end{equation}
+
+Luego las fuerzas se calculan componente a componente
+\begin{equation}
+  \begin{aligned}
+    \\F_{x_{ij}} = F_{ij} * {e^n}_{x_{ij}}
+    \\F_{y_{ij}} = F_{ij} * {e^n}_{y_{ij}}
+    \\F_{z_{ij}} = F_{ij} * {e^n}_{z_{ij}}
+    \end{aligned}
+\end{equation}
+
+Siendo
+\begin{equation}
+  \begin{aligned}
+    \\{e^n}_{x_{ij}} = (x_j - x_i) / \left | r_j - r_i \right |
+    \\{e^n}_{y_{ij}} = (y_j - y_i) / \left | r_j - r_i \right |
+    \\{e^n}_{z_{ij}} = (z_j - z_i) / \left | r_j - r_i \right |
+  \end{aligned}
+\end{equation}
+
+Luego las fuerzas totales en cada partícula p es la suma de todas las fuerzas ejercidas por las demás partículas que interactuan con ella
+\begin{equation}
+  \begin{aligned}
+    \\F_x = \sum_{j}F_{x_{pj}} * {e^n}_{x_{pj}}
+    \\F_y = \sum_{j}F_{y_{pj}} * {e^n}_{y_{pj}}
+    \\F_z = m_pg + \sum_{j}F_{z_{pj}} * {e^n}_{z_{pj}}
+  \end{aligned}
+\end{equation}
+
+Por último con cada componente de las fuerzas se calcula la aceleración con
+\begin{equation}
+\bar{a}=\bar{F}/m
+\end{equation}
+
+
+\subsection{Cálculo del caudal}
+
+Para calcular el caudal se cuenta con una lista de los tiempos en los que cada partícula atravesó la ranura para cada iteración. Con esta lista se calcula una média móvil con ventana de N elementos con la siguiente ecuación
+\begin{equation}
+    &Q[i] = \frac{N}{t_{i+N} -t_i}
+\end{equation}
+
+
+
+
+\section{Implementación}
+
+\subsection{Modelo}
+Contamos con las siguientes clases además de un main simple que las utiliza:
+\begin{itemize}
+  \item \textbf{GranularParticle:} representa la partícula y tiene toda la información que la concierne como posición, velocidad, aceleración, radio, masa, etc.
+
+  \item \textbf{GranularGrid:} es la encargada de mantener el cell index method y calcular los vecinos.
+
+  \item \textbf{SimulatorGranular:} es la simulación en sí. Con métodos para generar las partículas, calcular el siguiente paso de la simulación e imprimir a archivo cuando ella terminase.
+
+\end{itemize}
+
+\subsection{Reloj de arena}
+
+Para el reloj de arena se utilizó una geometría de un prisma rectangular que en su parte central tiene 4 planos en un ángulo tal que en el punto H/2 del prisma se genere una ranura cuadrada de largo D. 
+El reloj tiene un alto de 1.5m y un largo y ancho de 0.4m. Los planos superiores parten desde z=1m y llegan hasta la ranura que está en z=0.75m=H/2 y los inferiores solo están visualmente en la figura pero no fueron programados dado que son intrascendentes.
+
+\begin{figure}[!h]
+  % \includegraphics[width=\linewidth]{https://i.imgur.com/XhUYwbD.png}
+  \centerline{\includegraphics[scale=0.4]{https://i.imgur.com/5KKhDzt.png}}
+  \caption{El reloj de arena.}
+  \label{fig:boat1}
+\end{figure}
+
+
+\subsection{Algoritmo}
+\begin{enumerate}
+  \item Se generan las partículas con distribución uniforme y se agregan al GranularGrid.
+  \item En cada paso:
+  \begin{enumerate}
+    \item Se calculan las fuerzas aplicadas en cada partícula.
+    \item Se actualizan las velocidades y posiciones utilizando Verlet Leap-Frog.
+    \item Si una partícula pasa por la ranura, se guarda el tiempo en el que pasó.
+    \item Se recalculan los vecinos usando el cell index method.
+  \end{enumerate}
+  \item Se corta el ciclo al guardarse N estados.
+  \item Finalmente se guarda el archivo.
+\end{enumerate}
+
+
+\subsection{Pseudocódigo}
+\begin{verbatim}
+Main():
+  Simulator.simulate(deltaTime)
+
+Simulator.simulate(deltaTime):
+  saveTime = 1 / (deltaTime / 60) 		//para que en tiempo real sean 60fps
+  generateParticles()		//genera hasta que no puede generar sin overlap en 1000 intentos
+  counter = 0
+  while(true):
+    calculateParticleForces()		// calcula con cada vecino y con las paredes
+    updateParticlesPositions()	// utilizando verlet leap frog y si cayó lo suficiente se guarda el tiempo
+    recalculateNeighbours() 		// utilizando cell index method
+    if(counter % saveTime):
+      saveState()
+    if(savedStates == n);	// n es 60 * segundos de simulación
+      printToFile()
+      return
+\end{verbatim}
+
+
+\section{Resultados}
+
+\subsection{Parámetros y valores iniciales}
+
+Para llevar a cabo las simulaciones se utilizó un tiempo delta de 1e-5s, un \begin{math}\gamma\end{math} de 70 kg/s y un \begin{math}k_n\end{math} de 1000 N/m, y para cada prueba se hicieron 5 simulaciones con los mismos parámetros.
+
+Cada partícula tiene un radio entre 0.01m y 0.015m y una masa de 0.01 kg.
+
+Para el cálculo de la media móvil del caudal se utilizó una ventana deslizante de 100 elementos.
+
+\subsection{Media móvil del caudal}
+Para el siguiente gráfico se utilizó una ventana deslizante de 100 elementos. Se puede ver en el mismo que a medida que la ranura crece, se tiene una mayor variación en sus caudales.
+
+\begin{figure}[!h]
+  % \includegraphics[width=\linewidth]{https://i.imgur.com/XhUYwbD.png}
+  \centerline{\includegraphics[scale=0.6]{https://i.imgur.com/UOEspV9.png}}
+  \caption{Media móvil del caudal.}
+  \label{fig:boat1}
+\end{figure}
+
+A continuación, se encuentra el cálculo de la media de los resultados del gráfico anterior y sus desvíos estándares. Se permite ver con mayor claridad la supocision anterior que a medida que la ranura aumenta, tambien lo hace el desvio estandar.\endgraf
+
+Aún asi se puede ver en que valores se estabiliza cada uno de los caudales. Con una ranura de 0.1m el caudal se estabiliza a los 100 p/s, con 0.125m se estabiliza a los 200 p/s y con 0.25m se estabiliza en un valor entre 400 y 500 p/s.\endgraf
+
+Además se puede ver que en el caso de la ranura mas grande que el caudal acelera al final de la simulación. Esto se puede suponer que ocurre debido a que al quedar menos cantidad de partículas, el flujo crece hasta que no quedan más en el recipiente superior. 
+
+\begin{figure}[!h]
+  % \includegraphics[width=\linewidth]{https://i.imgur.com/XhUYwbD.png}
+  \centerline{\includegraphics[scale=0.6]{https://i.imgur.com/zsLohAC.png}}
+  \caption{Media de medias móviles del caudal.}
+  \label{fig:boat1}
+\end{figure}
+
+\newpage
+Sin tener en cuenta la parte inicial, donde el flujo no esta estabilizado, ni la parte final por la misma razón, obtenemos la tabla (Figura 4)
+\begin{figure}[!h]
+\begin{center}
+\begin{tabular}{ |c|c|c| } 
+ \hline
+ Ranura(m) & Media Caudal (p/s) & Desvío Caudal (p/s) \\ 
+ \hline
+ 0.100 & 84.25 & 6.73 \\ 
+ \hline
+ 0.125 & 193.85 & 30.18 \\ 
+ \hline
+ 0.150 & 431.27 & 131.31 \\ 
+ \hline
+\end{tabular}
+\end{center}
+\caption{Caudal medio por ranura}
+\label{fig:boat1}
+\end{figure}
+
+\subsection{Aproximación del modelo por Beverloo}
+La ley de Beverloo nos aproxima el caudal Q según el tamaño de la ranura y la geometría de las partículas
+\begin{equation}
+    \begin{aligned}
+    \\&Q\approx n_p *\sqrt{g}*(d - c*r)^{2.5} = B* (d - c*r)^{2.5}
+    \\&n_p: \textrm{part\'iculas por unidad de volumen}
+    \\&d: \textrm{di\'ametro de apertura}
+    \\&r: \textrm{radio medio de part\'iculas}
+    \end{aligned}
+\end{equation}
+
+Para encontrar el c que mejor aproxima a nuestros resultados se calculó el error para c\begin{math}\epsilon[0,8]\end{math} 
+\begin{equation}
+    E(c) = \sum_i \Big[Q_{exp_i} - B * (d_i - c*r)^{2.5}\Big]^2
+\end{equation}
+La densidad se obtuvo experimentalmente y fue de \begin{math}n_p=81400±100 p/m^3\end{math}.
+
+\begin{figure}[!h]
+  % \includegraphics[width=\linewidth]{https://i.imgur.com/XhUYwbD.png}
+  \centerline{\includegraphics[scale=0.5]{https://i.imgur.com/mlUjmpP.png}}
+  \caption{Error de ajuste de c}
+  \label{fig:boat1}
+\end{figure}
+
+El c cuyo error fue mínimo fue el de 5.652. (figura 5)
+
+\begin{figure}[!h]
+  % \includegraphics[width=\linewidth]{https://i.imgur.com/XhUYwbD.png}
+  \centerline{\includegraphics[scale=0.5]{https://i.imgur.com/syQhC1x.png}}
+  \caption{Aproximación por Beverloo.}
+  \label{fig:boat1}
+\end{figure}
+
+\section{Conclusión}
+Como es predecible, se puede ver que el caudal aumenta con el tamaño de la ranura (figura 4), pero también pudimos ver que a medida que esta aumenta el caudal también es más inestable. Por otro lado, se pudo aproximar la variable libre de Beverloo a un resultado aceptable de c=5.652.
+
+\section {Bibliografía}
+Nathan Bell, Yizhou Yu and Peter J. Mucha. Particle-Based Simulation of Granular Materials. Eurographics/ACM SIGGRAPH Symposium on Computer Animation (2005) (\url{http://wnbell.com/media/2005-07-SCA-Granular/BeYiMu2005.pdf})
+\end{document}

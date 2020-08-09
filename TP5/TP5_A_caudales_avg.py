@@ -44,6 +44,11 @@ if __name__ == "__main__":
         staticFile3 = open("./hourglass-data/0."+str(files[i])+"-3-times.stats", "r")
         staticFile4 = open("./hourglass-data/0."+str(files[i])+"-4-times.stats", "r")
         staticFile5 = open("./hourglass-data/0."+str(files[i])+"-5-times.stats", "r")
+        # staticFile = open("./data2/0."+str(files[i])+"-1-times.stats", "r")
+        # staticFile2 = open("./data2/0."+str(files[i])+"-2-times.stats", "r")
+        # staticFile3 = open("./data2/0."+str(files[i])+"-3-times.stats", "r")
+        # staticFile4 = open("./data2/0."+str(files[i])+"-4-times.stats", "r")
+        # staticFile5 = open("./data2/0."+str(files[i])+"-5-times.stats", "r")
 
         times = []
         times2 = []
